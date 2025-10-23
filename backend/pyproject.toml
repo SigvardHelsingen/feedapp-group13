@@ -1,0 +1,9 @@
+[project]
+name = "feedapp-backend"
+version = "0.1.0"
+description = "Backend for DAT250 Group 13 H2025 FeedApp"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.119.1",
+    "uvicorn>=0.38.0",
+]
