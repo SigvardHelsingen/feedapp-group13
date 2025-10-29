@@ -4,7 +4,7 @@ from fastapi import FastAPI
 
 from .config import get_settings
 from .db.db import create_db_engine
-from .routes import user
+from .routes import poll, user
 
 
 @asynccontextmanager
@@ -37,3 +37,4 @@ app = FastAPI(
 )
 
 app.include_router(user.router)
+app.include_router(poll.router)

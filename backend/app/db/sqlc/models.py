@@ -7,9 +7,31 @@ from typing import Optional
 import pydantic
 
 
+class Poll(pydantic.BaseModel):
+    id: int
+    question: str
+    expires_at: Optional[datetime.datetime]
+    created_by: int
+    created_at: Optional[datetime.datetime]
+
+
 class User(pydantic.BaseModel):
     id: int
     username: str
     email: str
     password_hash: str
     created_at: Optional[datetime.datetime]
+
+
+class Vote(pydantic.BaseModel):
+    id: int
+    user_id: int
+    vote_option_id: int
+    created_at: Optional[datetime.datetime]
+
+
+class VoteOption(pydantic.BaseModel):
+    id: int
+    poll_id: int
+    caption: str
+    presentation_order: int
