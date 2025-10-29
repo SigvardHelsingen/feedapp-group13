@@ -1,0 +1,27 @@
+# Python virtual environment
+.venv/
+venv/
+*.egg-info
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Caches
+.pytest_cache/
+.mypy_cache/
+
+# IDE directories
+.vscode/
+.idea/
+
+# Log files
+*.log
+
+# Local environment
+.env
+
+# Database schema
+db/schema.sql

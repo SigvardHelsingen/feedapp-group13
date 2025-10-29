@@ -5,5 +5,38 @@ description = "Backend for DAT250 Group 13 H2025 FeedApp"
 requires-python = ">=3.14"
 dependencies = [
     "fastapi>=0.119.1",
+    "pydantic[email]>=2.12.3",
+    "pydantic-settings>=2.11.0",
+    "sqlalchemy[asyncio]>=2.0.44",
+    "asyncpg>=0.30.0",
     "uvicorn>=0.38.0",
+    "pyjwt>=2.10.1",
+    "argon2-cffi>=25.1.0",
+    "gunicorn>=23.0.0",
+]
+
+[tool.setuptools]
+packages = ["app"]
+
+[tool.pyright]
+include = ["app", "tests"]
+exclude = ["app/config.py"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+combine_as_imports = true
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "pytest-mock>=3.15.1",
+    "black>=25.9.0",
+    "pre-commit>=4.3.0",
+    "httpx>=0.28.1",
+    "basedpyright>=1.32.1",
+    "isort>=7.0.0",
 ]

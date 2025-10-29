@@ -1,0 +1,35 @@
+# Python virtual environment
+.venv/
+venv/
+*.egg-info
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Caches
+.pytest_cache/
+.mypy_cache/
+
+# IDE directories
+.vscode/
+.idea/
+
+# Log files
+*.log
+
+# Local environment
+.env
+
+# Git
+.git
+
+# Build artifacts and configuration that are not needed at runtime
+db/
+sqlc.yaml
+
+# Docker files
+Dockerfile
+.dockerignore
