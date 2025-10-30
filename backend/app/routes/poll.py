@@ -71,13 +71,13 @@ async def delete_poll_by_id(
 
     poll = await q.get_poll(id=poll_id)
     if poll is None:
-        return HTTPException(
+        raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The requested poll does not exist",
         )
-
+    print(poll)
     if poll.creator_name != user.username:
-        return HTTPException(
+        raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="You can only delete your own polls",
         )
