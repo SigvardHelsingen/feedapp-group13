@@ -70,7 +70,6 @@ def test_full_poll_workflow(client: TestClient):
 
     # 5. User can delete their own poll
     user_owned_poll = get_polls_response.json()[0]["id"]
-    print(user_owned_poll)
     deleted_response = client.delete(f"api/poll/{user_owned_poll}")
     assert (
         deleted_response.status_code == status.HTTP_204_NO_CONTENT

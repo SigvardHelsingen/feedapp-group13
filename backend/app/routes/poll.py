@@ -55,7 +55,7 @@ async def get_poll_by_id(poll_id: int, conn: DBConnection):
     q = poll_queries.AsyncQuerier(conn)
     poll = await q.get_poll(id=poll_id)
     if poll is None:
-        return HTTPException(
+        raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="The requested poll does not exist",
         )
@@ -75,7 +75,6 @@ async def delete_poll_by_id(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The requested poll does not exist",
         )
-    print(poll)
     if poll.creator_name != user.username:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
