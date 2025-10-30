@@ -1,0 +1,18 @@
+-- name: DeleteUserVoteOnPoll :exec
+DELETE FROM vote
+WHERE vote_option_id IN (
+    SELECT id FROM vote_option WHERE poll_id = $1
+) AND user_id = $2;
+
+-- name: SubmitVote :exec
+INSERT INTO vote (user_id, vote_option_id)
+VALUES ($1, $2);
+
+-- name: GetVoteCounts :many
+SELECT vo.id as vote_option_id, vo.caption, count(v.id) AS vote_count
+FROM poll p
+INNER JOIN vote_option vo ON p.id = vo.poll_id
+INNER JOIN vote v ON v.poll_option_id = vo.id
+WHERE p.id = $1
+GROUP BY vo.id
+ORDER BY vo.presentation_order;

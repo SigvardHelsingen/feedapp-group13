@@ -9,7 +9,8 @@ VALUES ($1, $2, $3);
 
 -- name: GetPoll :one
 SELECT p.id, p.question, p.expires_at, u.username as creator_name,
-    array_agg(vo.caption ORDER BY vo.presentation_order)::text[] AS options
+    array_agg(vo.caption ORDER BY vo.presentation_order)::text[] AS options,
+    array_agg(vo.id ORDER BY vo.presentation_order)::bigint[] AS option_ids
 FROM poll p
 INNER JOIN vote_option vo ON p.id = vo.poll_id
 INNER JOIN "user" u ON p.created_by = u.id
@@ -18,7 +19,8 @@ GROUP BY p.id, u.id;
 
 -- name: GetPolls :many
 SELECT p.id, p.question, p.expires_at, u.username as creator_name,
-    array_agg(vo.caption ORDER BY vo.presentation_order)::text[] AS options
+    array_agg(vo.caption ORDER BY vo.presentation_order)::text[] AS options,
+    array_agg(vo.id ORDER BY vo.presentation_order)::bigint[] AS option_ids
 FROM poll p
 INNER JOIN vote_option vo ON p.id = vo.poll_id
 INNER JOIN "user" u ON p.created_by = u.id

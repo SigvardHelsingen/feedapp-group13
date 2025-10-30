@@ -36,7 +36,8 @@ DELETE FROM vote_option WHERE poll_id = :p1
 
 GET_POLL = """-- name: get_poll \\:one
 SELECT p.id, p.question, p.expires_at, u.username as creator_name,
-    array_agg(vo.caption ORDER BY vo.presentation_order)\\:\\:text[] AS options
+    array_agg(vo.caption ORDER BY vo.presentation_order)\\:\\:text[] AS options,
+    array_agg(vo.id ORDER BY vo.presentation_order)\\:\\:bigint[] AS option_ids
 FROM poll p
 INNER JOIN vote_option vo ON p.id = vo.poll_id
 INNER JOIN "user" u ON p.created_by = u.id
@@ -51,11 +52,13 @@ class GetPollRow(pydantic.BaseModel):
     expires_at: Optional[datetime.datetime]
     creator_name: str
     options: List[str]
+    option_ids: List[int]
 
 
 GET_POLLS = """-- name: get_polls \\:many
 SELECT p.id, p.question, p.expires_at, u.username as creator_name,
-    array_agg(vo.caption ORDER BY vo.presentation_order)\\:\\:text[] AS options
+    array_agg(vo.caption ORDER BY vo.presentation_order)\\:\\:text[] AS options,
+    array_agg(vo.id ORDER BY vo.presentation_order)\\:\\:bigint[] AS option_ids
 FROM poll p
 INNER JOIN vote_option vo ON p.id = vo.poll_id
 INNER JOIN "user" u ON p.created_by = u.id
@@ -69,6 +72,7 @@ class GetPollsRow(pydantic.BaseModel):
     expires_at: Optional[datetime.datetime]
     creator_name: str
     options: List[str]
+    option_ids: List[int]
 
 
 class AsyncQuerier:
@@ -114,6 +118,7 @@ class AsyncQuerier:
             expires_at=row[2],
             creator_name=row[3],
             options=row[4],
+            option_ids=row[5],
         )
 
     async def get_polls(self) -> AsyncIterator[GetPollsRow]:
@@ -125,4 +130,5 @@ class AsyncQuerier:
                 expires_at=row[2],
                 creator_name=row[3],
                 options=row[4],
+                option_ids=row[5],
             )
