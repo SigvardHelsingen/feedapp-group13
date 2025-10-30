@@ -1,0 +1,18 @@
+repos:
+  - repo: https://github.com/PyCQA/isort
+    rev: 7.0.0
+    hooks:
+      - id: isort
+  - repo: https://github.com/psf/black
+    rev: 25.9.0
+    hooks:
+      - id: black
+  - repo: local
+    hooks:
+      - id: local-biome-check
+        name: biome check
+        entry: /bin/sh -c 'cd frontend/ && pnpm lint && cd -'
+        language: system
+        types: [text]
+        files: "\\.(jsx?|tsx?|c(js|ts)|m(js|ts)|d\\.(ts|cts|mts)|jsonc?|css|svelte|vue|astro|graphql|gql)$"
+
