@@ -82,9 +82,9 @@ def test_full_poll_workflow(client: TestClient):
     ), "Cannot delete poll, does not exist"
 
     # 7. User cannot delete another users poll
-    client.post("api/user/logout")
-    client.post("api/user/create", json=user_data_2)
-    client.post("api/user/login", json=login_payload_2)
+    _ = client.post("api/user/logout")
+    _ = client.post("api/user/create", json=user_data_2)
+    _ = client.post("api/user/login", json=login_payload_2)
     user_owned_poll = get_polls_response.json()[1]["id"]
     deleted_response = client.delete(f"api/poll/{user_owned_poll}")
     assert (

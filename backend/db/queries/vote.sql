@@ -12,7 +12,7 @@ VALUES ($1, $2);
 SELECT vo.id as vote_option_id, vo.caption, count(v.id) AS vote_count
 FROM poll p
 INNER JOIN vote_option vo ON p.id = vo.poll_id
-INNER JOIN vote v ON v.poll_option_id = vo.id
+INNER JOIN vote v ON v.vote_option_id = vo.id
 WHERE p.id = $1
 GROUP BY vo.id
 ORDER BY vo.presentation_order;

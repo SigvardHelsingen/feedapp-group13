@@ -3,6 +3,7 @@ import random
 
 from fastapi import status
 from fastapi.testclient import TestClient
+from pydantic_settings import CliExplicitFlag
 
 
 def test_full_user_workflow(client: TestClient):
@@ -12,6 +13,15 @@ def test_full_user_workflow(client: TestClient):
         "username": f"testuser_{random_suffix}",
         "email": f"testuser_{random_suffix}@example.com",
         "password": password,
+    }
+    poll_data_non_expiry = {
+        "question": f"testquestion_{random_suffix}",
+        "options": [
+            f"testoption_{random_suffix}",
+            f"testoption_{random_suffix}",
+            f"testoption_{random_suffix}",
+        ],
+        "expires_at": None,
     }
     login_payload = {"username": user_data["username"], "password": password}
 
