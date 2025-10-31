@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { CreatePollPollCreatePostData, CreatePollPollCreatePostErrors, CreatePollPollCreatePostResponses, DeletePollByIdPollPollIdDeleteData, DeletePollByIdPollPollIdDeleteErrors, DeletePollByIdPollPollIdDeleteResponses, GetAllPollsPollAllGetData, GetAllPollsPollAllGetResponses, GetPollByIdPollPollIdGetData, GetPollByIdPollPollIdGetErrors, GetPollByIdPollPollIdGetResponses, LoginUserLoginPostData, LoginUserLoginPostErrors, LoginUserLoginPostResponses, LogoutUserLogoutPostData, LogoutUserLogoutPostResponses, ReadUsersMeUserMeGetData, ReadUsersMeUserMeGetResponses, RegisterUserUserRegisterPostData, RegisterUserUserRegisterPostErrors, RegisterUserUserRegisterPostResponses } from './types.gen';
+import type { CreatePollData, CreatePollErrors, CreatePollResponses, DeletePollByIdData, DeletePollByIdErrors, DeletePollByIdResponses, GetAllPollsData, GetAllPollsResponses, GetPollByIdData, GetPollByIdErrors, GetPollByIdResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, ReadUsersMeData, ReadUsersMeResponses, RegisterUserData, RegisterUserErrors, RegisterUserResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -21,8 +21,8 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 /**
  * Register User
  */
-export const registerUserUserRegisterPost = <ThrowOnError extends boolean = false>(options: Options<RegisterUserUserRegisterPostData, ThrowOnError>) => {
-    return (options.client ?? client).post<RegisterUserUserRegisterPostResponses, RegisterUserUserRegisterPostErrors, ThrowOnError>({
+export const registerUser = <ThrowOnError extends boolean = false>(options: Options<RegisterUserData, ThrowOnError>) => {
+    return (options.client ?? client).post<RegisterUserResponses, RegisterUserErrors, ThrowOnError>({
         url: '/user/register',
         ...options,
         headers: {
@@ -35,8 +35,8 @@ export const registerUserUserRegisterPost = <ThrowOnError extends boolean = fals
 /**
  * Login
  */
-export const loginUserLoginPost = <ThrowOnError extends boolean = false>(options: Options<LoginUserLoginPostData, ThrowOnError>) => {
-    return (options.client ?? client).post<LoginUserLoginPostResponses, LoginUserLoginPostErrors, ThrowOnError>({
+export const login = <ThrowOnError extends boolean = false>(options: Options<LoginData, ThrowOnError>) => {
+    return (options.client ?? client).post<LoginResponses, LoginErrors, ThrowOnError>({
         url: '/user/login',
         ...options,
         headers: {
@@ -49,8 +49,8 @@ export const loginUserLoginPost = <ThrowOnError extends boolean = false>(options
 /**
  * Logout
  */
-export const logoutUserLogoutPost = <ThrowOnError extends boolean = false>(options?: Options<LogoutUserLogoutPostData, ThrowOnError>) => {
-    return (options?.client ?? client).post<LogoutUserLogoutPostResponses, unknown, ThrowOnError>({
+export const logout = <ThrowOnError extends boolean = false>(options?: Options<LogoutData, ThrowOnError>) => {
+    return (options?.client ?? client).post<LogoutResponses, unknown, ThrowOnError>({
         url: '/user/logout',
         ...options
     });
@@ -59,8 +59,8 @@ export const logoutUserLogoutPost = <ThrowOnError extends boolean = false>(optio
 /**
  * Read Users Me
  */
-export const readUsersMeUserMeGet = <ThrowOnError extends boolean = false>(options?: Options<ReadUsersMeUserMeGetData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ReadUsersMeUserMeGetResponses, unknown, ThrowOnError>({
+export const readUsersMe = <ThrowOnError extends boolean = false>(options?: Options<ReadUsersMeData, ThrowOnError>) => {
+    return (options?.client ?? client).get<ReadUsersMeResponses, unknown, ThrowOnError>({
         url: '/user/me',
         ...options
     });
@@ -69,8 +69,8 @@ export const readUsersMeUserMeGet = <ThrowOnError extends boolean = false>(optio
 /**
  * Create Poll
  */
-export const createPollPollCreatePost = <ThrowOnError extends boolean = false>(options: Options<CreatePollPollCreatePostData, ThrowOnError>) => {
-    return (options.client ?? client).post<CreatePollPollCreatePostResponses, CreatePollPollCreatePostErrors, ThrowOnError>({
+export const createPoll = <ThrowOnError extends boolean = false>(options: Options<CreatePollData, ThrowOnError>) => {
+    return (options.client ?? client).post<CreatePollResponses, CreatePollErrors, ThrowOnError>({
         url: '/poll/create',
         ...options,
         headers: {
@@ -83,8 +83,8 @@ export const createPollPollCreatePost = <ThrowOnError extends boolean = false>(o
 /**
  * Get All Polls
  */
-export const getAllPollsPollAllGet = <ThrowOnError extends boolean = false>(options?: Options<GetAllPollsPollAllGetData, ThrowOnError>) => {
-    return (options?.client ?? client).get<GetAllPollsPollAllGetResponses, unknown, ThrowOnError>({
+export const getAllPolls = <ThrowOnError extends boolean = false>(options?: Options<GetAllPollsData, ThrowOnError>) => {
+    return (options?.client ?? client).get<GetAllPollsResponses, unknown, ThrowOnError>({
         url: '/poll/all',
         ...options
     });
@@ -93,8 +93,8 @@ export const getAllPollsPollAllGet = <ThrowOnError extends boolean = false>(opti
 /**
  * Delete Poll By Id
  */
-export const deletePollByIdPollPollIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeletePollByIdPollPollIdDeleteData, ThrowOnError>) => {
-    return (options.client ?? client).delete<DeletePollByIdPollPollIdDeleteResponses, DeletePollByIdPollPollIdDeleteErrors, ThrowOnError>({
+export const deletePollById = <ThrowOnError extends boolean = false>(options: Options<DeletePollByIdData, ThrowOnError>) => {
+    return (options.client ?? client).delete<DeletePollByIdResponses, DeletePollByIdErrors, ThrowOnError>({
         url: '/poll/{poll_id}',
         ...options
     });
@@ -103,8 +103,8 @@ export const deletePollByIdPollPollIdDelete = <ThrowOnError extends boolean = fa
 /**
  * Get Poll By Id
  */
-export const getPollByIdPollPollIdGet = <ThrowOnError extends boolean = false>(options: Options<GetPollByIdPollPollIdGetData, ThrowOnError>) => {
-    return (options.client ?? client).get<GetPollByIdPollPollIdGetResponses, GetPollByIdPollPollIdGetErrors, ThrowOnError>({
+export const getPollById = <ThrowOnError extends boolean = false>(options: Options<GetPollByIdData, ThrowOnError>) => {
+    return (options.client ?? client).get<GetPollByIdResponses, GetPollByIdErrors, ThrowOnError>({
         url: '/poll/{poll_id}',
         ...options
     });

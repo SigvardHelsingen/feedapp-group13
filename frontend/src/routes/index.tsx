@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { getAllPollsPollAllGetOptions } from "@/client/@tanstack/react-query.gen";
+import { getAllPollsOptions } from "@/client/@tanstack/react-query.gen";
 
 export const Route = createFileRoute("/")({
   component: App,
@@ -8,7 +8,7 @@ export const Route = createFileRoute("/")({
 
 function App() {
   const { data } = useQuery({
-    ...getAllPollsPollAllGetOptions({}),
+    ...getAllPollsOptions({}),
   });
 
   return <pre>{JSON.stringify(data, null, 2)}</pre>;

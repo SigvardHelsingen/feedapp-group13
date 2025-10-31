@@ -89,7 +89,7 @@ export const zHttpValidationError = z.object({
     detail: z.optional(z.array(zValidationError))
 });
 
-export const zRegisterUserUserRegisterPostData = z.object({
+export const zRegisterUserData = z.object({
     body: zCreateUserPayload,
     path: z.optional(z.never()),
     query: z.optional(z.never())
@@ -98,9 +98,9 @@ export const zRegisterUserUserRegisterPostData = z.object({
 /**
  * Successful Response
  */
-export const zRegisterUserUserRegisterPostResponse = zUserInfo;
+export const zRegisterUserResponse = zUserInfo;
 
-export const zLoginUserLoginPostData = z.object({
+export const zLoginData = z.object({
     body: zLoginPayload,
     path: z.optional(z.never()),
     query: z.optional(z.never())
@@ -109,9 +109,9 @@ export const zLoginUserLoginPostData = z.object({
 /**
  * Successful Response
  */
-export const zLoginUserLoginPostResponse = z.void();
+export const zLoginResponse = z.void();
 
-export const zLogoutUserLogoutPostData = z.object({
+export const zLogoutData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
     query: z.optional(z.never())
@@ -120,9 +120,9 @@ export const zLogoutUserLogoutPostData = z.object({
 /**
  * Successful Response
  */
-export const zLogoutUserLogoutPostResponse = z.void();
+export const zLogoutResponse = z.void();
 
-export const zReadUsersMeUserMeGetData = z.object({
+export const zReadUsersMeData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
     query: z.optional(z.never())
@@ -131,15 +131,15 @@ export const zReadUsersMeUserMeGetData = z.object({
 /**
  * Successful Response
  */
-export const zReadUsersMeUserMeGetResponse = zUserInfo;
+export const zReadUsersMeResponse = zUserInfo;
 
-export const zCreatePollPollCreatePostData = z.object({
+export const zCreatePollData = z.object({
     body: zCreatePollPayload,
     path: z.optional(z.never()),
     query: z.optional(z.never())
 });
 
-export const zGetAllPollsPollAllGetData = z.object({
+export const zGetAllPollsData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
     query: z.optional(z.never())
@@ -150,9 +150,9 @@ export const zGetAllPollsPollAllGetData = z.object({
  *
  * Successful Response
  */
-export const zGetAllPollsPollAllGetResponse = z.array(zGetPollsRow);
+export const zGetAllPollsResponse = z.array(zGetPollsRow);
 
-export const zDeletePollByIdPollPollIdDeleteData = z.object({
+export const zDeletePollByIdData = z.object({
     body: z.optional(z.never()),
     path: z.object({
         poll_id: z.int()
@@ -163,9 +163,9 @@ export const zDeletePollByIdPollPollIdDeleteData = z.object({
 /**
  * Successful Response
  */
-export const zDeletePollByIdPollPollIdDeleteResponse = z.void();
+export const zDeletePollByIdResponse = z.void();
 
-export const zGetPollByIdPollPollIdGetData = z.object({
+export const zGetPollByIdData = z.object({
     body: z.optional(z.never()),
     path: z.object({
         poll_id: z.int()
@@ -176,4 +176,4 @@ export const zGetPollByIdPollPollIdGetData = z.object({
 /**
  * Successful Response
  */
-export const zGetPollByIdPollPollIdGetResponse = zGetPollRow;
+export const zGetPollByIdResponse = zGetPollRow;

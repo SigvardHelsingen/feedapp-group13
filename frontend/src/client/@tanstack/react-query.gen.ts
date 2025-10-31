@@ -3,16 +3,16 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { createPollPollCreatePost, deletePollByIdPollPollIdDelete, getAllPollsPollAllGet, getPollByIdPollPollIdGet, loginUserLoginPost, logoutUserLogoutPost, type Options, readUsersMeUserMeGet, registerUserUserRegisterPost } from '../sdk.gen';
-import type { CreatePollPollCreatePostData, CreatePollPollCreatePostError, DeletePollByIdPollPollIdDeleteData, DeletePollByIdPollPollIdDeleteError, DeletePollByIdPollPollIdDeleteResponse, GetAllPollsPollAllGetData, GetPollByIdPollPollIdGetData, LoginUserLoginPostData, LoginUserLoginPostError, LoginUserLoginPostResponse, LogoutUserLogoutPostData, LogoutUserLogoutPostResponse, ReadUsersMeUserMeGetData, RegisterUserUserRegisterPostData, RegisterUserUserRegisterPostError, RegisterUserUserRegisterPostResponse } from '../types.gen';
+import { createPoll, deletePollById, getAllPolls, getPollById, login, logout, type Options, readUsersMe, registerUser } from '../sdk.gen';
+import type { CreatePollData, CreatePollError, DeletePollByIdData, DeletePollByIdError, DeletePollByIdResponse, GetAllPollsData, GetPollByIdData, LoginData, LoginError, LoginResponse, LogoutData, LogoutResponse, ReadUsersMeData, RegisterUserData, RegisterUserError, RegisterUserResponse } from '../types.gen';
 
 /**
  * Register User
  */
-export const registerUserUserRegisterPostMutation = (options?: Partial<Options<RegisterUserUserRegisterPostData>>): UseMutationOptions<RegisterUserUserRegisterPostResponse, RegisterUserUserRegisterPostError, Options<RegisterUserUserRegisterPostData>> => {
-    const mutationOptions: UseMutationOptions<RegisterUserUserRegisterPostResponse, RegisterUserUserRegisterPostError, Options<RegisterUserUserRegisterPostData>> = {
+export const registerUserMutation = (options?: Partial<Options<RegisterUserData>>): UseMutationOptions<RegisterUserResponse, RegisterUserError, Options<RegisterUserData>> => {
+    const mutationOptions: UseMutationOptions<RegisterUserResponse, RegisterUserError, Options<RegisterUserData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await registerUserUserRegisterPost({
+            const { data } = await registerUser({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -26,10 +26,10 @@ export const registerUserUserRegisterPostMutation = (options?: Partial<Options<R
 /**
  * Login
  */
-export const loginUserLoginPostMutation = (options?: Partial<Options<LoginUserLoginPostData>>): UseMutationOptions<LoginUserLoginPostResponse, LoginUserLoginPostError, Options<LoginUserLoginPostData>> => {
-    const mutationOptions: UseMutationOptions<LoginUserLoginPostResponse, LoginUserLoginPostError, Options<LoginUserLoginPostData>> = {
+export const loginMutation = (options?: Partial<Options<LoginData>>): UseMutationOptions<LoginResponse, LoginError, Options<LoginData>> => {
+    const mutationOptions: UseMutationOptions<LoginResponse, LoginError, Options<LoginData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await loginUserLoginPost({
+            const { data } = await login({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -43,10 +43,10 @@ export const loginUserLoginPostMutation = (options?: Partial<Options<LoginUserLo
 /**
  * Logout
  */
-export const logoutUserLogoutPostMutation = (options?: Partial<Options<LogoutUserLogoutPostData>>): UseMutationOptions<LogoutUserLogoutPostResponse, DefaultError, Options<LogoutUserLogoutPostData>> => {
-    const mutationOptions: UseMutationOptions<LogoutUserLogoutPostResponse, DefaultError, Options<LogoutUserLogoutPostData>> = {
+export const logoutMutation = (options?: Partial<Options<LogoutData>>): UseMutationOptions<LogoutResponse, DefaultError, Options<LogoutData>> => {
+    const mutationOptions: UseMutationOptions<LogoutResponse, DefaultError, Options<LogoutData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await logoutUserLogoutPost({
+            const { data } = await logout({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -92,15 +92,15 @@ const createQueryKey = <TOptions extends Options>(id: string, options?: TOptions
     ];
 };
 
-export const readUsersMeUserMeGetQueryKey = (options?: Options<ReadUsersMeUserMeGetData>) => createQueryKey('readUsersMeUserMeGet', options);
+export const readUsersMeQueryKey = (options?: Options<ReadUsersMeData>) => createQueryKey('readUsersMe', options);
 
 /**
  * Read Users Me
  */
-export const readUsersMeUserMeGetOptions = (options?: Options<ReadUsersMeUserMeGetData>) => {
+export const readUsersMeOptions = (options?: Options<ReadUsersMeData>) => {
     return queryOptions({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await readUsersMeUserMeGet({
+            const { data } = await readUsersMe({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -108,17 +108,17 @@ export const readUsersMeUserMeGetOptions = (options?: Options<ReadUsersMeUserMeG
             });
             return data;
         },
-        queryKey: readUsersMeUserMeGetQueryKey(options)
+        queryKey: readUsersMeQueryKey(options)
     });
 };
 
 /**
  * Create Poll
  */
-export const createPollPollCreatePostMutation = (options?: Partial<Options<CreatePollPollCreatePostData>>): UseMutationOptions<unknown, CreatePollPollCreatePostError, Options<CreatePollPollCreatePostData>> => {
-    const mutationOptions: UseMutationOptions<unknown, CreatePollPollCreatePostError, Options<CreatePollPollCreatePostData>> = {
+export const createPollMutation = (options?: Partial<Options<CreatePollData>>): UseMutationOptions<unknown, CreatePollError, Options<CreatePollData>> => {
+    const mutationOptions: UseMutationOptions<unknown, CreatePollError, Options<CreatePollData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await createPollPollCreatePost({
+            const { data } = await createPoll({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -129,15 +129,15 @@ export const createPollPollCreatePostMutation = (options?: Partial<Options<Creat
     return mutationOptions;
 };
 
-export const getAllPollsPollAllGetQueryKey = (options?: Options<GetAllPollsPollAllGetData>) => createQueryKey('getAllPollsPollAllGet', options);
+export const getAllPollsQueryKey = (options?: Options<GetAllPollsData>) => createQueryKey('getAllPolls', options);
 
 /**
  * Get All Polls
  */
-export const getAllPollsPollAllGetOptions = (options?: Options<GetAllPollsPollAllGetData>) => {
+export const getAllPollsOptions = (options?: Options<GetAllPollsData>) => {
     return queryOptions({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getAllPollsPollAllGet({
+            const { data } = await getAllPolls({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -145,17 +145,17 @@ export const getAllPollsPollAllGetOptions = (options?: Options<GetAllPollsPollAl
             });
             return data;
         },
-        queryKey: getAllPollsPollAllGetQueryKey(options)
+        queryKey: getAllPollsQueryKey(options)
     });
 };
 
 /**
  * Delete Poll By Id
  */
-export const deletePollByIdPollPollIdDeleteMutation = (options?: Partial<Options<DeletePollByIdPollPollIdDeleteData>>): UseMutationOptions<DeletePollByIdPollPollIdDeleteResponse, DeletePollByIdPollPollIdDeleteError, Options<DeletePollByIdPollPollIdDeleteData>> => {
-    const mutationOptions: UseMutationOptions<DeletePollByIdPollPollIdDeleteResponse, DeletePollByIdPollPollIdDeleteError, Options<DeletePollByIdPollPollIdDeleteData>> = {
+export const deletePollByIdMutation = (options?: Partial<Options<DeletePollByIdData>>): UseMutationOptions<DeletePollByIdResponse, DeletePollByIdError, Options<DeletePollByIdData>> => {
+    const mutationOptions: UseMutationOptions<DeletePollByIdResponse, DeletePollByIdError, Options<DeletePollByIdData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await deletePollByIdPollPollIdDelete({
+            const { data } = await deletePollById({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -166,15 +166,15 @@ export const deletePollByIdPollPollIdDeleteMutation = (options?: Partial<Options
     return mutationOptions;
 };
 
-export const getPollByIdPollPollIdGetQueryKey = (options: Options<GetPollByIdPollPollIdGetData>) => createQueryKey('getPollByIdPollPollIdGet', options);
+export const getPollByIdQueryKey = (options: Options<GetPollByIdData>) => createQueryKey('getPollById', options);
 
 /**
  * Get Poll By Id
  */
-export const getPollByIdPollPollIdGetOptions = (options: Options<GetPollByIdPollPollIdGetData>) => {
+export const getPollByIdOptions = (options: Options<GetPollByIdData>) => {
     return queryOptions({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getPollByIdPollPollIdGet({
+            const { data } = await getPollById({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -182,6 +182,6 @@ export const getPollByIdPollPollIdGetOptions = (options: Options<GetPollByIdPoll
             });
             return data;
         },
-        queryKey: getPollByIdPollPollIdGetQueryKey(options)
+        queryKey: getPollByIdQueryKey(options)
     });
 };

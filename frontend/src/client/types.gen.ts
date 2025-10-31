@@ -160,119 +160,119 @@ export type ValidationError = {
     type: string;
 };
 
-export type RegisterUserUserRegisterPostData = {
+export type RegisterUserData = {
     body: CreateUserPayload;
     path?: never;
     query?: never;
     url: '/user/register';
 };
 
-export type RegisterUserUserRegisterPostErrors = {
+export type RegisterUserErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type RegisterUserUserRegisterPostError = RegisterUserUserRegisterPostErrors[keyof RegisterUserUserRegisterPostErrors];
+export type RegisterUserError = RegisterUserErrors[keyof RegisterUserErrors];
 
-export type RegisterUserUserRegisterPostResponses = {
+export type RegisterUserResponses = {
     /**
      * Successful Response
      */
     201: UserInfo;
 };
 
-export type RegisterUserUserRegisterPostResponse = RegisterUserUserRegisterPostResponses[keyof RegisterUserUserRegisterPostResponses];
+export type RegisterUserResponse = RegisterUserResponses[keyof RegisterUserResponses];
 
-export type LoginUserLoginPostData = {
+export type LoginData = {
     body: LoginPayload;
     path?: never;
     query?: never;
     url: '/user/login';
 };
 
-export type LoginUserLoginPostErrors = {
+export type LoginErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type LoginUserLoginPostError = LoginUserLoginPostErrors[keyof LoginUserLoginPostErrors];
+export type LoginError = LoginErrors[keyof LoginErrors];
 
-export type LoginUserLoginPostResponses = {
+export type LoginResponses = {
     /**
      * Successful Response
      */
     204: void;
 };
 
-export type LoginUserLoginPostResponse = LoginUserLoginPostResponses[keyof LoginUserLoginPostResponses];
+export type LoginResponse = LoginResponses[keyof LoginResponses];
 
-export type LogoutUserLogoutPostData = {
+export type LogoutData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/user/logout';
 };
 
-export type LogoutUserLogoutPostResponses = {
+export type LogoutResponses = {
     /**
      * Successful Response
      */
     204: void;
 };
 
-export type LogoutUserLogoutPostResponse = LogoutUserLogoutPostResponses[keyof LogoutUserLogoutPostResponses];
+export type LogoutResponse = LogoutResponses[keyof LogoutResponses];
 
-export type ReadUsersMeUserMeGetData = {
+export type ReadUsersMeData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/user/me';
 };
 
-export type ReadUsersMeUserMeGetResponses = {
+export type ReadUsersMeResponses = {
     /**
      * Successful Response
      */
     200: UserInfo;
 };
 
-export type ReadUsersMeUserMeGetResponse = ReadUsersMeUserMeGetResponses[keyof ReadUsersMeUserMeGetResponses];
+export type ReadUsersMeResponse = ReadUsersMeResponses[keyof ReadUsersMeResponses];
 
-export type CreatePollPollCreatePostData = {
+export type CreatePollData = {
     body: CreatePollPayload;
     path?: never;
     query?: never;
     url: '/poll/create';
 };
 
-export type CreatePollPollCreatePostErrors = {
+export type CreatePollErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type CreatePollPollCreatePostError = CreatePollPollCreatePostErrors[keyof CreatePollPollCreatePostErrors];
+export type CreatePollError = CreatePollErrors[keyof CreatePollErrors];
 
-export type CreatePollPollCreatePostResponses = {
+export type CreatePollResponses = {
     /**
      * Successful Response
      */
     201: unknown;
 };
 
-export type GetAllPollsPollAllGetData = {
+export type GetAllPollsData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/poll/all';
 };
 
-export type GetAllPollsPollAllGetResponses = {
+export type GetAllPollsResponses = {
     /**
      * Response Get All Polls Poll All Get
      *
@@ -281,9 +281,9 @@ export type GetAllPollsPollAllGetResponses = {
     200: Array<GetPollsRow>;
 };
 
-export type GetAllPollsPollAllGetResponse = GetAllPollsPollAllGetResponses[keyof GetAllPollsPollAllGetResponses];
+export type GetAllPollsResponse = GetAllPollsResponses[keyof GetAllPollsResponses];
 
-export type DeletePollByIdPollPollIdDeleteData = {
+export type DeletePollByIdData = {
     body?: never;
     path: {
         /**
@@ -295,25 +295,25 @@ export type DeletePollByIdPollPollIdDeleteData = {
     url: '/poll/{poll_id}';
 };
 
-export type DeletePollByIdPollPollIdDeleteErrors = {
+export type DeletePollByIdErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type DeletePollByIdPollPollIdDeleteError = DeletePollByIdPollPollIdDeleteErrors[keyof DeletePollByIdPollPollIdDeleteErrors];
+export type DeletePollByIdError = DeletePollByIdErrors[keyof DeletePollByIdErrors];
 
-export type DeletePollByIdPollPollIdDeleteResponses = {
+export type DeletePollByIdResponses = {
     /**
      * Successful Response
      */
     204: void;
 };
 
-export type DeletePollByIdPollPollIdDeleteResponse = DeletePollByIdPollPollIdDeleteResponses[keyof DeletePollByIdPollPollIdDeleteResponses];
+export type DeletePollByIdResponse = DeletePollByIdResponses[keyof DeletePollByIdResponses];
 
-export type GetPollByIdPollPollIdGetData = {
+export type GetPollByIdData = {
     body?: never;
     path: {
         /**
@@ -325,20 +325,20 @@ export type GetPollByIdPollPollIdGetData = {
     url: '/poll/{poll_id}';
 };
 
-export type GetPollByIdPollPollIdGetErrors = {
+export type GetPollByIdErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type GetPollByIdPollPollIdGetError = GetPollByIdPollPollIdGetErrors[keyof GetPollByIdPollPollIdGetErrors];
+export type GetPollByIdError = GetPollByIdErrors[keyof GetPollByIdErrors];
 
-export type GetPollByIdPollPollIdGetResponses = {
+export type GetPollByIdResponses = {
     /**
      * Successful Response
      */
     200: GetPollRow;
 };
 
-export type GetPollByIdPollPollIdGetResponse = GetPollByIdPollPollIdGetResponses[keyof GetPollByIdPollPollIdGetResponses];
+export type GetPollByIdResponse = GetPollByIdResponses[keyof GetPollByIdResponses];
