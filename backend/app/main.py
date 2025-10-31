@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.routing import APIRoute
 
 from .config import get_settings
 from .db.db import create_db_engine
@@ -39,3 +40,9 @@ app = FastAPI(
 app.include_router(user.router)
 app.include_router(poll.router)
 app.include_router(vote.router)
+
+# Make the OpenAPI operation ids match the route function name
+# Ensures nicer names on the generated client
+for route in app.routes:
+    if isinstance(route, APIRoute):
+        route.operation_id = route.name
