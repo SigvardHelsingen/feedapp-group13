@@ -13,23 +13,26 @@ It is built with the following components:
 
 ```
 backend/
-├── app/                  # The main FastAPI application package
-│   ├── auth/             # Authentication logic (cookie handling, user dependencies)
-│   ├── db/               # Database connection management and sqlc-generated code
-│   │   ├── sqlc/         # sqlc auto-generated models and query functions. DO NOT EDIT.
-│   │   └── db.py         # SQLAlchemy engine setup and dependency injection logic
-│   ├── routes/           # API route handlers, split by resource
-│   ├── utils/            # Utility models and functions
-│   ├── main.py           # FastAPI application entrypoint and lifespan manager
-│   └── config.py         # Configuration
-├── db/                   # Database directory (dbmate and sqlc)
-│   ├── migrations/       # dbmate migration files (and sqlc schema source of truth)
-│   └── queries/          # Raw SQL queries for sqlc, split by resource
-├── tests/                # Automated tests for the application
-│   ├── integration/      # End-to-end tests for API workflows
-│   └── conftest.py       # Test configuration
-├── pyproject.toml        # Project definition and dependencies for uv
-└── sqlc.yaml             # sqlc configuration
+├── app/                       # The main FastAPI application package
+│   ├── auth/                  # Authentication logic (cookie handling, user dependencies)
+│   ├── db/                    # Database connection management and sqlc-generated code
+│   │   ├── sqlc/              # sqlc auto-generated models and query functions. DO NOT EDIT.
+│   │   ├── valkey.py          # Valkey connection pool setup and dependency injection logic
+│   │   └── db.py              # SQLAlchemy engine setup and dependency injection logic
+│   ├── routes/                # API route handlers, split by resource
+│   ├── utils/                 # Utility models and functions
+│   │   ├── user_info.py       # User model redacting sensitive information, redaction function
+│   │   └── vote_counter.py    # Valkey-based concurrency-safe vote counter
+│   ├── main.py                # FastAPI application entrypoint and lifespan manager
+│   └── config.py              # Configuration
+├── db/                        # Database directory (dbmate and sqlc)
+│   ├── migrations/            # dbmate migration files (and sqlc schema source of truth)
+│   └── queries/               # Raw SQL queries for sqlc, split by resource
+├── tests/                     # Automated tests for the application
+│   ├── integration/           # End-to-end tests for API workflows
+│   └── conftest.py            # Test configuration
+├── pyproject.toml             # Project definition and dependencies for uv
+└── sqlc.yaml                  # sqlc configuration
 ```
 
 ## Getting Started
@@ -37,7 +40,8 @@ backend/
 ### Prerequisites
 - Python 3.14+
 - `uv` (https://docs.astral.sh/uv/)
-- A PostgreSQL server
+- A running PostgreSQL server
+- A running Valkey server
 - `dbmate` (needs to be installed with an external package manager, e.g., `brew install dbmate`)
 - `sqlc` (needs to be installed with an external package manager, e.g., `brew install sqlc`)
 
@@ -60,6 +64,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=feedapp
 TEST_DB_NAME=feedapp_test
+VALKEY_CONN_STR=valkey://localhost/feedapp
 ```
 
 ### 3. Database Setup
@@ -89,6 +94,7 @@ This project utilizes FastAPI's dependency injection system to provide resources
 To inject a dependency, make the route accept an argument of the dependency type.
 
 - **DBConnection**: defined in `app/db/db.py`, asynchronous transactional SQLAlchemy connection that can be used with the sqlc queries
+- **ValkeyConnection**: defined in `app/db/valkey.py`, asynchronous Valkey connection from a pool. Entire database is flushed on every application startup.
 - **CurrentUserOptional, CurrentUserRequired**: defined in `app/auth/cookie.py`, gets the current user from JWT cookie, either optionally or mandatorily
 
 ### Database Workflow: `dbmate` and `sqlc`
@@ -142,6 +148,7 @@ uv pip install -e .
 ## Code Formatting with Black and isort
 
 This project uses `black` and `isort` for code formatting and input sorting, enforced by `pre-commit`.
+The frontend also uses this to format its code with `biome`.
 
 ### One-Time Setup
 

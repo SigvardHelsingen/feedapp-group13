@@ -21,6 +21,8 @@ class Settings(BaseSettings):
 
     TEST_DB_NAME: str
 
+    VALKEY_CONN_STR: str
+
     @property
     def database_url(self) -> str:
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"

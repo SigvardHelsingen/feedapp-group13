@@ -3,6 +3,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
 
+from app.db.valkey import create_valkey_pool
+
 from .config import get_settings
 from .db.db import create_db_engine
 from .routes import poll, user, vote
@@ -20,7 +22,14 @@ async def lifespan(app: FastAPI):
     engine = create_db_engine(settings)
     app.state.db_engine = engine
 
+    print("Creating Valkey connection pool")
+    pool = await create_valkey_pool(settings)
+    app.state.valkey_pool = pool
+
     yield
+
+    print("Disposing Valkey connection pool")
+    await pool.aclose()
 
     print("Disposing SQLAlchemy engine...")
     await engine.dispose()
