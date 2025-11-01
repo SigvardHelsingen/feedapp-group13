@@ -1,5 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
+from starlette.status import HTTP_400_BAD_REQUEST
+
+from app.routes.poll import poll_queries
 
 from ..auth.cookie import CurrentUserRequired
 from ..db.db import DBConnection
@@ -18,6 +21,17 @@ async def submit_vote(
     user: CurrentUserRequired, payload: VotePayload, conn: DBConnection
 ):
     q = vote_queries.AsyncQuerier(conn)
+    p = poll_queries.AsyncQuerier(conn)
+    poll = await p.get_poll(id=payload.poll_id)
+    if poll is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Poll not found"
+        )
+    if payload.vote_option_id not in poll.option_ids:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Poll option id not found"
+        )
+
     await q.delete_user_vote_on_poll(poll_id=payload.poll_id, user_id=user.id)
     await q.submit_vote(user_id=user.id, vote_option_id=payload.vote_option_id)
 
