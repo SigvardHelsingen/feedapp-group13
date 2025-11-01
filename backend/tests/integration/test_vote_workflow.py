@@ -4,6 +4,7 @@ import random
 
 from fastapi import status
 from fastapi.testclient import TestClient
+from starlette.status import HTTP_404_NOT_FOUND
 
 
 def test_full_poll_workflow(client: TestClient):
@@ -49,3 +50,25 @@ def test_full_poll_workflow(client: TestClient):
     assert (
         register_vote.status_code == status.HTTP_201_CREATED
     ), f"Failed to submit vote for poll {test_poll['id']}"
+
+    # 3. Trying to vote on a non-existing poll.
+    vote_data_non_existing_poll = {
+        "vote_option_id": test_poll["option_ids"][0],
+        "poll_id": 10000,
+    }
+    register_vote = client.post("/api/vote/submit", json=vote_data_non_existing_poll)
+    assert (
+        register_vote.status_code == status.HTTP_404_NOT_FOUND
+    ), "Cannot vote on non-existing poll"
+
+    # 4. Trying to vote on a non-existing vote-option.
+    vote_data_non_existing_vote_option = {
+        "vote_option_id": 1000,
+        "poll_id": test_poll["id"],
+    }
+    register_vote = client.post(
+        "/api/vote/submit", json=vote_data_non_existing_vote_option
+    )
+    assert (
+        register_vote.status_code == status.HTTP_404_NOT_FOUND
+    ), "Cannot vote on non-existing vote_option"

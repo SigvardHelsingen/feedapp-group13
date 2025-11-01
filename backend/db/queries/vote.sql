@@ -9,7 +9,7 @@ INSERT INTO vote (user_id, vote_option_id)
 VALUES ($1, $2);
 
 -- name: GetVoteCounts :many
-SELECT vo.id as vote_option_id, vo.caption, count(v.id) AS vote_count
+SELECT vo.id as vote_option_id, count(v.id) AS vote_count
 FROM poll p
 INNER JOIN vote_option vo ON p.id = vo.poll_id
 INNER JOIN vote v ON v.vote_option_id = vo.id

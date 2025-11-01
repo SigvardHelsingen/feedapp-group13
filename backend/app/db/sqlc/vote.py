@@ -19,7 +19,7 @@ WHERE vote_option_id IN (
 
 
 GET_VOTE_COUNTS = """-- name: get_vote_counts \\:many
-SELECT vo.id as vote_option_id, vo.caption, count(v.id) AS vote_count
+SELECT vo.id as vote_option_id, count(v.id) AS vote_count
 FROM poll p
 INNER JOIN vote_option vo ON p.id = vo.poll_id
 INNER JOIN vote v ON v.vote_option_id = vo.id
@@ -31,7 +31,6 @@ ORDER BY vo.presentation_order
 
 class GetVoteCountsRow(pydantic.BaseModel):
     vote_option_id: int
-    caption: str
     vote_count: int
 
 
@@ -55,8 +54,7 @@ class AsyncQuerier:
         async for row in result:
             yield GetVoteCountsRow(
                 vote_option_id=row[0],
-                caption=row[1],
-                vote_count=row[2],
+                vote_count=row[1],
             )
 
     async def submit_vote(self, *, user_id: int, vote_option_id: int) -> None:
