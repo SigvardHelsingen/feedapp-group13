@@ -63,7 +63,6 @@ async def login(payload: LoginPayload, response: Response, conn: DBConnection):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
         )
 
     user_info = user_info_from_user(user)

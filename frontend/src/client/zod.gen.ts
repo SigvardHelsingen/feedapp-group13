@@ -54,6 +54,15 @@ export const zGetPollsRow = z.object({
 });
 
 /**
+ * GetVoteCountsRow
+ */
+export const zGetVoteCountsRow = z.object({
+    vote_option_id: z.int(),
+    caption: z.string(),
+    vote_count: z.int()
+});
+
+/**
  * LoginPayload
  */
 export const zLoginPayload = z.object({
@@ -87,6 +96,14 @@ export const zValidationError = z.object({
  */
 export const zHttpValidationError = z.object({
     detail: z.optional(z.array(zValidationError))
+});
+
+/**
+ * VotePayload
+ */
+export const zVotePayload = z.object({
+    vote_option_id: z.int(),
+    poll_id: z.int()
 });
 
 export const zRegisterUserData = z.object({
@@ -177,3 +194,24 @@ export const zGetPollByIdData = z.object({
  * Successful Response
  */
 export const zGetPollByIdResponse = zGetPollRow;
+
+export const zSubmitVoteData = z.object({
+    body: zVotePayload,
+    path: z.optional(z.never()),
+    query: z.optional(z.never())
+});
+
+export const zGetVotesForPollData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        poll_id: z.int()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * Response Get Votes For Poll Vote  Poll Id  Get
+ *
+ * Successful Response
+ */
+export const zGetVotesForPollResponse = z.array(zGetVoteCountsRow);

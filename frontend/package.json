@@ -7,8 +7,8 @@
     "build": "vite build && tsc",
     "serve": "vite preview",
     "test": "vitest run",
-    "format": "biome format",
-    "lint": "biome lint",
+    "format": "biome format --write",
+    "lint": "biome lint --write",
     "check": "biome check --write",
     "openapi-ts": "openapi-ts"
   },

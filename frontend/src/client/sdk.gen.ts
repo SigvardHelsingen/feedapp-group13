@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { CreatePollData, CreatePollErrors, CreatePollResponses, DeletePollByIdData, DeletePollByIdErrors, DeletePollByIdResponses, GetAllPollsData, GetAllPollsResponses, GetPollByIdData, GetPollByIdErrors, GetPollByIdResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, ReadUsersMeData, ReadUsersMeResponses, RegisterUserData, RegisterUserErrors, RegisterUserResponses } from './types.gen';
+import type { CreatePollData, CreatePollErrors, CreatePollResponses, DeletePollByIdData, DeletePollByIdErrors, DeletePollByIdResponses, GetAllPollsData, GetAllPollsResponses, GetPollByIdData, GetPollByIdErrors, GetPollByIdResponses, GetVotesForPollData, GetVotesForPollErrors, GetVotesForPollResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, ReadUsersMeData, ReadUsersMeResponses, RegisterUserData, RegisterUserErrors, RegisterUserResponses, SubmitVoteData, SubmitVoteErrors, SubmitVoteResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -106,6 +106,30 @@ export const deletePollById = <ThrowOnError extends boolean = false>(options: Op
 export const getPollById = <ThrowOnError extends boolean = false>(options: Options<GetPollByIdData, ThrowOnError>) => {
     return (options.client ?? client).get<GetPollByIdResponses, GetPollByIdErrors, ThrowOnError>({
         url: '/poll/{poll_id}',
+        ...options
+    });
+};
+
+/**
+ * Submit Vote
+ */
+export const submitVote = <ThrowOnError extends boolean = false>(options: Options<SubmitVoteData, ThrowOnError>) => {
+    return (options.client ?? client).post<SubmitVoteResponses, SubmitVoteErrors, ThrowOnError>({
+        url: '/vote/submit',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * Get Votes For Poll
+ */
+export const getVotesForPoll = <ThrowOnError extends boolean = false>(options: Options<GetVotesForPollData, ThrowOnError>) => {
+    return (options.client ?? client).get<GetVotesForPollResponses, GetVotesForPollErrors, ThrowOnError>({
+        url: '/vote/{poll_id}',
         ...options
     });
 };

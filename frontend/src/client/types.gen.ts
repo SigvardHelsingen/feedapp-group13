@@ -101,6 +101,24 @@ export type GetPollsRow = {
 };
 
 /**
+ * GetVoteCountsRow
+ */
+export type GetVoteCountsRow = {
+    /**
+     * Vote Option Id
+     */
+    vote_option_id: number;
+    /**
+     * Caption
+     */
+    caption: string;
+    /**
+     * Vote Count
+     */
+    vote_count: number;
+};
+
+/**
  * HTTPValidationError
  */
 export type HttpValidationError = {
@@ -158,6 +176,20 @@ export type ValidationError = {
      * Error Type
      */
     type: string;
+};
+
+/**
+ * VotePayload
+ */
+export type VotePayload = {
+    /**
+     * Vote Option Id
+     */
+    vote_option_id: number;
+    /**
+     * Poll Id
+     */
+    poll_id: number;
 };
 
 export type RegisterUserData = {
@@ -342,3 +374,58 @@ export type GetPollByIdResponses = {
 };
 
 export type GetPollByIdResponse = GetPollByIdResponses[keyof GetPollByIdResponses];
+
+export type SubmitVoteData = {
+    body: VotePayload;
+    path?: never;
+    query?: never;
+    url: '/vote/submit';
+};
+
+export type SubmitVoteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SubmitVoteError = SubmitVoteErrors[keyof SubmitVoteErrors];
+
+export type SubmitVoteResponses = {
+    /**
+     * Successful Response
+     */
+    201: unknown;
+};
+
+export type GetVotesForPollData = {
+    body?: never;
+    path: {
+        /**
+         * Poll Id
+         */
+        poll_id: number;
+    };
+    query?: never;
+    url: '/vote/{poll_id}';
+};
+
+export type GetVotesForPollErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetVotesForPollError = GetVotesForPollErrors[keyof GetVotesForPollErrors];
+
+export type GetVotesForPollResponses = {
+    /**
+     * Response Get Votes For Poll Vote  Poll Id  Get
+     *
+     * Successful Response
+     */
+    200: Array<GetVoteCountsRow>;
+};
+
+export type GetVotesForPollResponse = GetVotesForPollResponses[keyof GetVotesForPollResponses];
