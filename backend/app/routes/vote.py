@@ -1,12 +1,9 @@
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
-from starlette.status import HTTP_400_BAD_REQUEST
-
-from app.routes.poll import poll_queries
 
 from ..auth.cookie import CurrentUserRequired
 from ..db.db import DBConnection
-from ..db.sqlc import vote as vote_queries
+from ..db.sqlc import poll as poll_queries, vote as vote_queries
 
 router = APIRouter(prefix="/vote", tags=["vote"])
 
