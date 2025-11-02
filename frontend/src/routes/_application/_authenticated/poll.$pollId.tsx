@@ -1,11 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  getAllPollsOptions,
+  getPollByIdOptions,
   submitVoteMutation,
 } from "@/client/@tanstack/react-query.gen";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import type { GetPollRow } from "@/client";
 
 export const Route = createFileRoute(
   "/_application/_authenticated/poll/$pollId",
@@ -15,12 +14,15 @@ export const Route = createFileRoute(
 
 function PollComponent() {
   const { pollId } = Route.useParams();
-  const { data = [] } = useQuery({
-    ...getAllPollsOptions({}),
+
+  const { data: selectedPoll, error } = useQuery({
+    ...getPollByIdOptions({
+      path: {
+        poll_id: parseInt(pollId, 10),
+      },
+    }),
+    retry: false,
   });
-  const selectedPoll = Array.isArray(data)
-    ? data.find((p: GetPollRow) => String(p.id) === String(pollId))
-    : undefined;
 
   const [status, setStatus] = useState("");
   const submitVote = useMutation({
