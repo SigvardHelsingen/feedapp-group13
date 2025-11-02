@@ -21,6 +21,9 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 FROM python:3.14-alpine
 
+# SQLAlchemy concurrency depends on the C++ STL
+RUN apk add --no-cache libstdc++
+
 WORKDIR /app
 
 # Create non-root user
@@ -36,5 +39,6 @@ USER appuser
 
 EXPOSE 8000
 
+ENV PYTHONUNBUFFERED=1
 # Run 4 uvicorn workers, managed by gUnicorn
 CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "app.main:app", "--bind", "0.0.0.0:8000"]

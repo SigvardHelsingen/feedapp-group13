@@ -18,8 +18,11 @@ class Settings(BaseSettings):
     DB_HOST: str
     DB_PORT: str
     DB_NAME: str
+    DB_MAX_POOL_SIZE: int
 
     TEST_DB_NAME: str
+
+    VALKEY_CONN_STR: str
 
     @property
     def database_url(self) -> str:

@@ -2,7 +2,7 @@
 # versions:
 #   sqlc v1.30.0
 # source: vote.sql
-from typing import AsyncIterator
+from typing import AsyncIterator, Optional
 
 import pydantic
 import sqlalchemy
@@ -10,11 +10,12 @@ import sqlalchemy.ext.asyncio
 
 from app.db.sqlc import models
 
-DELETE_USER_VOTE_ON_POLL = """-- name: delete_user_vote_on_poll \\:exec
+DELETE_USER_VOTE_ON_POLL = """-- name: delete_user_vote_on_poll \\:one
 DELETE FROM vote
 WHERE vote_option_id IN (
     SELECT id FROM vote_option WHERE poll_id = :p1
 ) AND user_id = :p2
+RETURNING vote_option_id
 """
 
 
@@ -22,7 +23,7 @@ GET_VOTE_COUNTS = """-- name: get_vote_counts \\:many
 SELECT vo.id as vote_option_id, count(v.id) AS vote_count
 FROM poll p
 INNER JOIN vote_option vo ON p.id = vo.poll_id
-INNER JOIN vote v ON v.vote_option_id = vo.id
+LEFT JOIN vote v ON v.vote_option_id = vo.id
 WHERE p.id = :p1
 GROUP BY vo.id
 ORDER BY vo.presentation_order
@@ -44,10 +45,18 @@ class AsyncQuerier:
     def __init__(self, conn: sqlalchemy.ext.asyncio.AsyncConnection):
         self._conn = conn
 
-    async def delete_user_vote_on_poll(self, *, poll_id: int, user_id: int) -> None:
-        await self._conn.execute(
-            sqlalchemy.text(DELETE_USER_VOTE_ON_POLL), {"p1": poll_id, "p2": user_id}
-        )
+    async def delete_user_vote_on_poll(
+        self, *, poll_id: int, user_id: int
+    ) -> Optional[int]:
+        row = (
+            await self._conn.execute(
+                sqlalchemy.text(DELETE_USER_VOTE_ON_POLL),
+                {"p1": poll_id, "p2": user_id},
+            )
+        ).first()
+        if row is None:
+            return None
+        return row[0]
 
     async def get_vote_counts(self, *, id: int) -> AsyncIterator[GetVoteCountsRow]:
         result = await self._conn.stream(sqlalchemy.text(GET_VOTE_COUNTS), {"p1": id})
