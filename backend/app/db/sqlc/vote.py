@@ -23,7 +23,7 @@ GET_VOTE_COUNTS = """-- name: get_vote_counts \\:many
 SELECT vo.id as vote_option_id, count(v.id) AS vote_count
 FROM poll p
 INNER JOIN vote_option vo ON p.id = vo.poll_id
-LEFT JOIN vote v ON v.vote_option_id = vo.id
+LEFT JOIN vote v ON v.vote_option_id = vo.id  -- Keep options with 0 votes
 WHERE p.id = :p1
 GROUP BY vo.id
 ORDER BY vo.presentation_order

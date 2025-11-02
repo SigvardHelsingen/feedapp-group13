@@ -68,6 +68,10 @@ export type GetPollRow = {
      * Option Ids
      */
     option_ids: Array<number>;
+    /**
+     * User Vote
+     */
+    user_vote: unknown;
 };
 
 /**
@@ -108,10 +112,6 @@ export type GetVoteCountsRow = {
      * Vote Option Id
      */
     vote_option_id: number;
-    /**
-     * Caption
-     */
-    caption: string;
     /**
      * Vote Count
      */

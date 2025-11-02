@@ -10,11 +10,13 @@ VALUES ($1, $2, $3);
 -- name: GetPoll :one
 SELECT p.id, p.question, p.expires_at, u.username as creator_name,
     array_agg(vo.caption ORDER BY vo.presentation_order)::text[] AS options,
-    array_agg(vo.id ORDER BY vo.presentation_order)::bigint[] AS option_ids
+    array_agg(vo.id ORDER BY vo.presentation_order)::bigint[] AS option_ids,
+    max(v.vote_option_id) as user_vote
 FROM poll p
 INNER JOIN vote_option vo ON p.id = vo.poll_id
 INNER JOIN "user" u ON p.created_by = u.id
-WHERE p.id = $1
+LEFT JOIN vote v ON v.vote_option_id = vo.id AND v.user_id = sqlc.narg(user_id)
+WHERE p.id = sqlc.arg(poll_id)
 GROUP BY p.id, u.id;
 
 -- name: GetPolls :many
