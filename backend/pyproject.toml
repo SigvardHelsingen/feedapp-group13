@@ -40,4 +40,5 @@ dev = [
     "httpx>=0.28.1",
     "basedpyright>=1.32.1",
     "isort>=7.0.0",
+    "uvloop>=0.22.1",
 ]

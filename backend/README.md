@@ -63,6 +63,7 @@ DB_PASSWORD=your_postgres_password
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=feedapp
+DB_MAX_POOL_SIZE=5
 TEST_DB_NAME=feedapp_test
 VALKEY_CONN_STR=valkey://localhost/feedapp
 ```
@@ -144,6 +145,16 @@ To fix this, install the application as an editable component to the virtual env
 ```sh
 uv pip install -e .
 ```
+
+### Manual tests
+
+We've got a load test for checking if vote counting is done correctly. Run the application in a Docker container with a fresh database, then run the script:
+
+```sh
+uv run python tests/manual/load_test_vote_counting.py
+```
+
+You might need to adjust some numbers here: max concurrent requests, number of users, timeouts, and maybe DB connection pool size in the container.
 
 ## Code Formatting with Black and isort
 
