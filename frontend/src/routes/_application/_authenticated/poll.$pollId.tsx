@@ -6,7 +6,6 @@ import {
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import type { GetPollRow } from "@/client";
-import { statSync } from "fs";
 
 export const Route = createFileRoute(
   "/_application/_authenticated/poll/$pollId",
@@ -35,8 +34,7 @@ function PollComponent() {
   });
 
   console.log(status);
-  //setVoteOptionId removed for commit.
-  const [voteOptionId] = useState(Number);
+  const [voteOptionId, setVoteOptionId] = useState(Number);
   function onSubmitVote() {
     submitVote.mutate({
       body: {
