@@ -69,7 +69,7 @@ async def delete_poll_by_id(
 ):
     q = poll_queries.AsyncQuerier(conn)
 
-    poll = await q.get_poll(id=poll_id)
+    poll = await q.get_poll(poll_id=poll_id, user_id=None)
     if poll is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
