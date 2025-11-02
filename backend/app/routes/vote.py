@@ -25,7 +25,7 @@ async def submit_vote(
 ):
     q = vote_queries.AsyncQuerier(conn)
     p = poll_queries.AsyncQuerier(conn)
-    poll = await p.get_poll(id=payload.poll_id)
+    poll = await p.get_poll(poll_id=payload.poll_id, user_id=None)
     if poll is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Poll not found"
