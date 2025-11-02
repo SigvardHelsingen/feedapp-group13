@@ -19,8 +19,9 @@ async def lifespan(app: FastAPI):
     settings = get_settings()
 
     print("Creating SQLAlchemy engine...")
-    engine = create_db_engine(settings)
+    engine, db_semaphore = create_db_engine(settings)
     app.state.db_engine = engine
+    app.state.db_semaphore = db_semaphore
 
     print("Creating Valkey connection pool")
     pool = await create_valkey_pool(settings)

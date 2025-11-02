@@ -9,6 +9,14 @@ repos:
       - id: black
   - repo: local
     hooks:
+      - id: local-pytest
+        name: pytest
+        entry: /bin/sh -c 'cd backend/ && uv run pytest && cd -'
+        language: system
+        types: [text]
+        files: "\\.(py|sql)$"
+  - repo: local
+    hooks:
       - id: local-biome-check
         name: biome check
         entry: /bin/sh -c 'cd frontend/ && pnpm lint && cd -'
