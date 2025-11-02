@@ -3,7 +3,7 @@
 #   sqlc v1.30.0
 # source: poll.sql
 import datetime
-from typing import AsyncIterator, List, Optional
+from typing import Any, AsyncIterator, List, Optional
 
 import pydantic
 import sqlalchemy
@@ -37,11 +37,13 @@ DELETE FROM vote_option WHERE poll_id = :p1
 GET_POLL = """-- name: get_poll \\:one
 SELECT p.id, p.question, p.expires_at, u.username as creator_name,
     array_agg(vo.caption ORDER BY vo.presentation_order)\\:\\:text[] AS options,
-    array_agg(vo.id ORDER BY vo.presentation_order)\\:\\:bigint[] AS option_ids
+    array_agg(vo.id ORDER BY vo.presentation_order)\\:\\:bigint[] AS option_ids,
+    max(v.vote_option_id) as user_vote
 FROM poll p
 INNER JOIN vote_option vo ON p.id = vo.poll_id
 INNER JOIN "user" u ON p.created_by = u.id
-WHERE p.id = :p1
+LEFT JOIN vote v ON v.vote_option_id = vo.id AND v.user_id = :p1
+WHERE p.id = :p2
 GROUP BY p.id, u.id
 """
 
@@ -53,6 +55,7 @@ class GetPollRow(pydantic.BaseModel):
     creator_name: str
     options: List[str]
     option_ids: List[int]
+    user_vote: Any
 
 
 GET_POLLS = """-- name: get_polls \\:many
@@ -108,8 +111,14 @@ class AsyncQuerier:
             sqlalchemy.text(DELETE_VOTE_OPTIONS_FOR_POLL), {"p1": poll_id}
         )
 
-    async def get_poll(self, *, id: int) -> Optional[GetPollRow]:
-        row = (await self._conn.execute(sqlalchemy.text(GET_POLL), {"p1": id})).first()
+    async def get_poll(
+        self, *, user_id: Optional[int], poll_id: int
+    ) -> Optional[GetPollRow]:
+        row = (
+            await self._conn.execute(
+                sqlalchemy.text(GET_POLL), {"p1": user_id, "p2": poll_id}
+            )
+        ).first()
         if row is None:
             return None
         return GetPollRow(
@@ -119,6 +128,7 @@ class AsyncQuerier:
             creator_name=row[3],
             options=row[4],
             option_ids=row[5],
+            user_vote=row[6],
         )
 
     async def get_polls(self) -> AsyncIterator[GetPollsRow]:

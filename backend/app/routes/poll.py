@@ -4,7 +4,7 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
-from ..auth.cookie import CurrentUserRequired
+from ..auth.cookie import CurrentUserOptional, CurrentUserRequired
 from ..db.db import DBConnection
 from ..db.sqlc import poll as poll_queries
 
@@ -51,9 +51,9 @@ async def get_all_polls(conn: DBConnection):
 
 
 @router.get("/{poll_id}", response_model=poll_queries.GetPollRow)
-async def get_poll_by_id(poll_id: int, conn: DBConnection):
+async def get_poll_by_id(poll_id: int, conn: DBConnection, user: CurrentUserOptional):
     q = poll_queries.AsyncQuerier(conn)
-    poll = await q.get_poll(id=poll_id)
+    poll = await q.get_poll(poll_id=poll_id, user_id=user.id if user else None)
     if poll is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

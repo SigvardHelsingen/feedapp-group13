@@ -35,7 +35,8 @@ export const zGetPollRow = z.object({
     ]),
     creator_name: z.string(),
     options: z.array(z.string()),
-    option_ids: z.array(z.int())
+    option_ids: z.array(z.int()),
+    user_vote: z.unknown()
 });
 
 /**
@@ -58,7 +59,6 @@ export const zGetPollsRow = z.object({
  */
 export const zGetVoteCountsRow = z.object({
     vote_option_id: z.int(),
-    caption: z.string(),
     vote_count: z.int()
 });
 
