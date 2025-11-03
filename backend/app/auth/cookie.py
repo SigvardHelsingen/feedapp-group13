@@ -8,12 +8,40 @@ from ..utils.user_info import UserInfo
 
 _COOKIE_NAME = "feedapp_session_token"
 
+SECRET_KEY = "CHANGE_ME_TO_A_LONG_RANDOM_SECRET"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_SECONDS = 3600
+
+""" 
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+        to_encode.update({"exp": expire})
+"""
+
+def create_jwt(user_info: UserInfo) -> str:
+    """ Create a a signed JWT for the given user."""
+    now = datetime.utcnow()
+    exp = now + timedelta(seconds=ACCESS_TOKEN_EXPIRE_SECONDS)
+
+    payload = {
+        "sub": str(user_info.id),
+        "iat": int(now.timestamp()),
+        "exp": int(exp.timestamp()),
+        "id": user_info.id,
+        "username": user_info.username,
+        "email": user_info.email,
+    }
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
 
 def set_auth_cookie(user_info: UserInfo, response: Response):
     """
     Create a JWT and store it in a cookie
     """
-    token = jwt.encode(user_info.__dict__, "secret", algorithm="HS256")
+    token = jwt.encode(user_info.__dict__, "secret", algorithm="HS256") ##<-- TODO
     response.set_cookie(
         key=_COOKIE_NAME,
         value=token,
@@ -42,11 +70,21 @@ def get_current_user_optional(request: Request, response: Response) -> UserInfo 
     if not token_str:
         return None
 
-    # TODO: Validate properly
     try:
-        token = jwt.decode(token_str, "secret", algorithms=["HS256"])
+        payload = jwt.decode(token_str, SECRET_KEY, algorithms=[ALGORITHM])
+    except ExpiredSignatureError:
+        #Token is expired: clear the cookie, treat as not logged in
+        clear_auth_cookie(response)
+        return None
     except DecodeError:
-        raise
+        #Token is invalid/malformed: cleark cookie, treat as "not logged in"
+        clear_auth_cookie(response)
+        return None
+
+    #Sanity check
+    user_id = payload.get("id") or payload.get("sub")
+    username = payload.get("username")
+    email = payload.get("email")
 
     user = UserInfo(
         id=token["id"],
