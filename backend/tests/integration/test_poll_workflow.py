@@ -78,7 +78,7 @@ def test_full_poll_workflow(client: TestClient):
     # 6. User cannot delete an already deleted poll
     deleted_response = client.delete(f"api/poll/{user_owned_poll}")
     assert (
-        deleted_response.status_code == status.HTTP_400_BAD_REQUEST
+        deleted_response.status_code == status.HTTP_401_UNAUTHORIZED
     ), "Cannot delete poll, does not exist"
 
     # 7. User cannot delete another users poll

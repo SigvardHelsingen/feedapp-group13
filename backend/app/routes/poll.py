@@ -4,9 +4,11 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
+from app.db.sqlc.models import Permission, Role
+
 from ..auth.cookie import CurrentUserOptional, CurrentUserRequired
 from ..db.db import DBConnection
-from ..db.sqlc import poll as poll_queries
+from ..db.sqlc import auth as auth_queries, poll as poll_queries
 
 router = APIRouter(prefix="/poll", tags=["poll"])
 
@@ -37,6 +39,10 @@ async def create_poll(
             detail="Could not store poll to database",
         )
 
+    # Assign RBAC roles (TODO: allow user input here)
+    await q.assign_role(user_id=user.id, poll_id=poll_id, role=Role.CREATOR)
+    await q.assign_public_perms(poll_id=poll_id, role=Role.VOTER)
+
     coros = [
         q.create_vote_option(caption=cap, poll_id=poll_id, presentation_order=i)
         for i, cap in enumerate(payload.options)
@@ -45,9 +51,9 @@ async def create_poll(
 
 
 @router.get("/all", response_model=list[poll_queries.GetPollsRow])
-async def get_all_polls(conn: DBConnection):
+async def get_all_polls(conn: DBConnection, user: CurrentUserOptional):
     q = poll_queries.AsyncQuerier(conn)
-    return [x async for x in q.get_polls()]
+    return [x async for x in q.get_polls(user_id=user.id if user else None)]
 
 
 @router.get("/{poll_id}", response_model=poll_queries.GetPollRow)
@@ -57,7 +63,7 @@ async def get_poll_by_id(poll_id: int, conn: DBConnection, user: CurrentUserOpti
     if poll is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="The requested poll does not exist",
+            detail="The requested poll does not exist, or access is not granted",
         )
 
     return poll
@@ -67,19 +73,20 @@ async def get_poll_by_id(poll_id: int, conn: DBConnection, user: CurrentUserOpti
 async def delete_poll_by_id(
     poll_id: int, user: CurrentUserRequired, conn: DBConnection
 ):
-    q = poll_queries.AsyncQuerier(conn)
-
-    poll = await q.get_poll(poll_id=poll_id, user_id=None)
-    if poll is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="The requested poll does not exist",
-        )
-    if poll.creator_name != user.username:
+    a = auth_queries.AsyncQuerier(conn)
+    delete_access = await a.can_user_do_at(
+        user_id=user.id,
+        poll_id=poll_id,
+        permission=Permission.POLL_DELETE,
+        timestamp=None,
+    )
+    if delete_access is None or not delete_access:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="You can only delete your own polls",
+            detail="You don't have delete access to this poll, or it does not exist",
         )
 
-    await q.delete_vote_options_for_poll(poll_id=poll.id)
-    await q.delete_poll(id=poll.id)
+    q = poll_queries.AsyncQuerier(conn)
+    await q.delete_grants_for_poll(poll_id=poll_id)
+    await q.delete_vote_options_for_poll(poll_id=poll_id)
+    await q.delete_poll(id=poll_id)

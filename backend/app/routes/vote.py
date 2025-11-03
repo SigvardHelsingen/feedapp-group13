@@ -1,11 +1,12 @@
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
+from app.db.sqlc.models import Permission
 from app.utils.vote_counter import ensure_valkey_vote_table, vote_table_key
 
 from ..auth.cookie import CurrentUserRequired
 from ..db.db import DBConnection
-from ..db.sqlc import poll as poll_queries, vote as vote_queries
+from ..db.sqlc import auth as auth_queries, poll as poll_queries, vote as vote_queries
 from ..db.valkey import ValkeyConnection
 
 router = APIRouter(prefix="/vote", tags=["vote"])
@@ -23,9 +24,22 @@ async def submit_vote(
     conn: DBConnection,
     valkey: ValkeyConnection,
 ):
+    a = auth_queries.AsyncQuerier(conn)
+    vote_access = await a.can_user_do_at(
+        user_id=user.id,
+        poll_id=payload.poll_id,
+        permission=Permission.POLL_VOTE,
+        timestamp=None,
+    )
+    if vote_access is None or not vote_access:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have voting rights for this poll",
+        )
+
     q = vote_queries.AsyncQuerier(conn)
     p = poll_queries.AsyncQuerier(conn)
-    poll = await p.get_poll(poll_id=payload.poll_id, user_id=None)
+    poll = await p.get_poll(poll_id=payload.poll_id, user_id=user.id)
     if poll is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Poll not found"

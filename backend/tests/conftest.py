@@ -1,6 +1,7 @@
 import os
 import subprocess
 from collections.abc import Generator
+from time import sleep
 
 import pytest
 from fastapi.testclient import TestClient

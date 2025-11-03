@@ -3,7 +3,7 @@
 #   sqlc v1.30.0
 # source: auth.sql
 import datetime
-from typing import Optional
+from typing import Any, Optional
 
 import sqlalchemy
 import sqlalchemy.ext.asyncio
@@ -13,7 +13,7 @@ from app.db.sqlc import models
 CAN_USER_DO_AT = """-- name: can_user_do_at \\:one
 SELECT can_user_do_at(
     :p1, :p2,
-    :p3, :p4)
+    :p3, COALESCE(:p4, now()))
 """
 
 
@@ -42,7 +42,7 @@ class AsyncQuerier:
         user_id: int,
         poll_id: int,
         permission: models.Permission,
-        timestamp: Optional[datetime.datetime]
+        timestamp: Optional[Any]
     ) -> Optional[bool]:
         row = (
             await self._conn.execute(

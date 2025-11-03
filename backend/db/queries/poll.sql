@@ -3,6 +3,14 @@ INSERT INTO poll (question, created_by, expires_at)
 VALUES ($1, $2, $3)
 RETURNING id;
 
+-- name: AssignRole :exec
+INSERT INTO poll_grants (role, scope, user_id, poll_id)
+VALUES ($1, 'user_poll', $2, $3);
+
+-- name: AssignPublicPerms :exec
+INSERT INTO poll_grants (role, scope, poll_id)
+VALUES ($1, 'public_poll', $2);
+
 -- name: CreateVoteOption :exec
 INSERT INTO vote_option (caption, poll_id, presentation_order)
 VALUES ($1, $2, $3);
@@ -16,7 +24,7 @@ FROM poll p
 INNER JOIN vote_option vo ON p.id = vo.poll_id
 INNER JOIN "user" u ON p.created_by = u.id
 LEFT JOIN vote v ON v.vote_option_id = vo.id AND v.user_id = sqlc.narg(user_id)
-WHERE p.id = sqlc.arg(poll_id)
+WHERE p.id = sqlc.arg(poll_id) AND can_user_do_at(sqlc.narg(user_id), sqlc.arg(poll_id), 'poll:view')
 GROUP BY p.id, u.id;
 
 -- name: GetPolls :many
@@ -26,7 +34,11 @@ SELECT p.id, p.question, p.expires_at, u.username as creator_name,
 FROM poll p
 INNER JOIN vote_option vo ON p.id = vo.poll_id
 INNER JOIN "user" u ON p.created_by = u.id
+WHERE can_user_do_at(sqlc.narg(user_id), p.id, 'poll:view')
 GROUP BY p.id, u.id;
+
+-- name: DeleteGrantsForPoll :exec
+DELETE FROM poll_grants WHERE poll_id = $1;
 
 -- name: DeleteVoteOptionsForPoll :exec
 DELETE FROM vote_option WHERE poll_id = $1;
