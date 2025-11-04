@@ -10,36 +10,30 @@ try:
 except Exception:
     get_settings = None
 
+def _cfg(name:str, default):
+    s = get_settings() if get_settings else None
+    return getattr(s, name, default) if s is not None else default
+
 _COOKIE_NAME = "feedapp_session_token"
+
 # config (...)
 SECRET_KEY: str = (
-    getattr(settings, "SECRET_KEY", None) or
-    getattr(settings, "JWT_SECRET_KEY", None) or
+    _cfg("SECRET_KEY", None) or
+    _cfg("JWT_SECRET_KEY", None) or
     "REMEMBER-TO_CHANGE-ME-TO-SOMETHING-USEFUL-PLEASE"
 )
-ALGORITHM: str = getattr(settings, "ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_SECONDS: int = int(
-    getattr(settings, "ACCESS_TOKEN_EXPIRE_SECONDS", 3600)
-)
-COOKIE_SECURE: bool = getattr(settings, "COOKIE_SECURE", False)
-COOKIE_SAMESITE: str = getattr(settings, "COOKIE_SAMESITE", "strict")
-COOKIE_DOMAIN: Optional[str] = getattr(settings, "COOKIE_DOMAIN", None)
+ALGORITHM: str = _cfg("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_SECONDS: int = int(_cfg("ACCESS_TOKEN_EXPIRE_SECONDS", 3600))
+COOKIE_SECURE: bool = bool(_cfg("COOKIE_SECURE", False))
+COOKIE_SAMESITE: str = _cfg("COOKIE_SAMESITE", "strict")
+COOKIE_DOMAIN: Optional[str] = _cfg("COOKIE_DOMAIN", None)
 
 #sliding session refresh
-SLIDING_RENEW_THRESHOLD_SEC: int = getattr(settings, "SLIDING_RENEW_THRESHOLD", 15*60)
-
-""" 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    to_encode = data.copy()
-
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-        to_encode.update({"exp": expire})
-"""
+SLIDING_RENEW_THRESHOLD_SEC: int = int(_cfg("SLIDING_RENEW_THRESHOLD", 15*60))
 
 def create_jwt(user_info: UserInfo) -> str:
-    """ Create a a signed JWT for the given user."""
-    now = datetime.utcnow()
+    """ Create a signed JWT for the given user."""
+    now = datetime.now(timezone.utc)
     exp = now + timedelta(seconds=ACCESS_TOKEN_EXPIRE_SECONDS)
 
     payload = {
@@ -75,10 +69,10 @@ def set_auth_cookie(user_info: UserInfo, response: Response):
         key=_COOKIE_NAME,
         value=token,
         httponly=True,
-        secure=False,  # TODO: set this to True (breaks the TestClient)
-        samesite="strict",
-        max_age=ACCESS_TOKEN_EXPIRE_SECONDS
-        #max_age=3600,  # 1 hour
+        secure=COOKIE_SECURE,  # TODO: set this to True (breaks the TestClient)
+        samesite=COOKIE_SAMESITE,
+        domain=COOKIE_DOMAIN,
+        max_age=ACCESS_TOKEN_EXPIRE_SECONDS,
     )
 
 
@@ -121,12 +115,8 @@ def get_current_user_optional(request: Request, response: Response) -> UserInfo 
         clear_auth_cookie(response)
         return None
 
-    user = UserInfo( #user = UserInfo(id=int(user_id), username=str(username), email=str(email))
-        id=token["id"],
-        username=token["username"],
-        email=token["email"],
-    )
-
+    # user = UserInfo(id=token["id"],username=token["username"],email=token["email"])
+    user = UserInfo(id=int(user_id), username=str(username), email=str(email))
 
     # Renew the token
     # set_auth_cookie(user, response)
