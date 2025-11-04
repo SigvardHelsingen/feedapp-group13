@@ -5,9 +5,13 @@ from fastapi import Depends, HTTPException, Request, Response, status
 from jwt.exceptions import DecodeError
 
 from ..utils.user_info import UserInfo
+#try:
+#    from app.utils.config import get_settings
+#except Exception:
+#    get_settings = None
 
 _COOKIE_NAME = "feedapp_session_token"
-
+# config (...)
 SECRET_KEY = "CHANGE_ME_TO_A_LONG_RANDOM_SECRET"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_SECONDS = 3600
@@ -85,6 +89,10 @@ def get_current_user_optional(request: Request, response: Response) -> UserInfo 
     user_id = payload.get("id") or payload.get("sub")
     username = payload.get("username")
     email = payload.get("email")
+
+    if user_id is None or username is None or email is None:
+        clear_auth_cookie(response)
+        return None
 
     user = UserInfo(
         id=token["id"],
