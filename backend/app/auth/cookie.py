@@ -9,7 +9,7 @@ from ..utils.user_info import UserInfo
 #    from app.utils.config import get_settings
 #except Exception:
 #    get_settings = None
-
+##GITCHECK
 _COOKIE_NAME = "feedapp_session_token"
 # config (...)
 SECRET_KEY = "CHANGE_ME_TO_A_LONG_RANDOM_SECRET"
