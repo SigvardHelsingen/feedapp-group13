@@ -3,12 +3,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
 
+from .routes import auth_debug #debug auth here
+
 from app.db.valkey import create_valkey_pool
 
 from .config import get_settings
 from .db.db import create_db_engine
 from .routes import poll, user, vote
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -22,9 +23,12 @@ async def lifespan(app: FastAPI):
     engine = create_db_engine(settings)
     app.state.db_engine = engine
 
+
+
     print("Creating Valkey connection pool")
     pool = await create_valkey_pool(settings)
     app.state.valkey_pool = pool
+
 
     yield
 
@@ -49,6 +53,8 @@ app = FastAPI(
 app.include_router(user.router)
 app.include_router(poll.router)
 app.include_router(vote.router)
+app.include_router(auth_debug.router) #for auth_debug.py
+
 
 # Make the OpenAPI operation ids match the route function name
 # Ensures nicer names on the generated client
