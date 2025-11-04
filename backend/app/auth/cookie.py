@@ -1,8 +1,11 @@
 from typing import Annotated
 
+from datetime import datetime, timedelta, timezone
+from typing import Annotated, Optional
+
 import jwt
 from fastapi import Depends, HTTPException, Request, Response, status
-from jwt.exceptions import DecodeError
+from jwt.exceptions import DecodeError, ExpiredSignatureError, InvalidTokenError
 
 from ..utils.user_info import UserInfo
 try:
