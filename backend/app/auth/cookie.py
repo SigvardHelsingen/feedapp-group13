@@ -5,39 +5,20 @@ from typing import Annotated, Optional
 
 import jwt
 from fastapi import Depends, HTTPException, Request, Response, status
-from jwt.exceptions import DecodeError, ExpiredSignatureError, InvalidTokenError
+from jwt import DecodeError, ExpiredSignatureError, InvalidTokenError
 
+from ..config import get_settings
 from ..utils.user_info import UserInfo
-try:
-    from app.utils.config import get_settings
-except Exception:
-    get_settings = None
 
-def _cfg(name:str, default):
-    s = get_settings() if get_settings else None
-    return getattr(s, name, default) if s is not None else default
 
 _COOKIE_NAME = "feedapp_session_token"
 
-# config (...)
-SECRET_KEY: str = (
-    _cfg("SECRET_KEY", None) or
-    _cfg("JWT_SECRET_KEY", None) or
-    "REMEMBER-TO_CHANGE-ME-TO-SOMETHING-USEFUL-PLEASE"
-)
-ALGORITHM: str = _cfg("ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_SECONDS: int = int(_cfg("ACCESS_TOKEN_EXPIRE_SECONDS", 3600))
-COOKIE_SECURE: bool = bool(_cfg("COOKIE_SECURE", False))
-COOKIE_SAMESITE: str = _cfg("COOKIE_SAMESITE", "strict")
-COOKIE_DOMAIN: Optional[str] = _cfg("COOKIE_DOMAIN", None)
-
-#sliding session refresh
-SLIDING_RENEW_THRESHOLD_SEC: int = int(_cfg("SLIDING_RENEW_THRESHOLD", 15*60))
 
 def create_jwt(user_info: UserInfo) -> str:
     """ Create a signed JWT for the given user."""
+    settings = get_settings()
     now = datetime.now(timezone.utc)
-    exp = now + timedelta(seconds=ACCESS_TOKEN_EXPIRE_SECONDS)
+    exp = now + timedelta(seconds=settings.SESSION_TTL_SECONDS)
 
     payload = {
         "sub": str(user_info.id),
@@ -45,12 +26,13 @@ def create_jwt(user_info: UserInfo) -> str:
         "exp": int(exp.timestamp()),
         "id": user_info.id,
         "username": user_info.username,
-        "email": user_info.email,
+        "email": str(user_info.email),
     }
-    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
 def _maybe_renew_sliding_token(payload: dict, response: Response, user: UserInfo):
     """Renew the cookie only if token is close to expiry"""
+    settings = get_settings()
     exp_ts = payload.get("exp")
     if not isinstance(exp_ts, int):
         # if missing/invalid, just issue a fresh one
@@ -58,7 +40,7 @@ def _maybe_renew_sliding_token(payload: dict, response: Response, user: UserInfo
         return
 
     now_ts = int(datetime.now(timezone.utc).timestamp())
-    if exp_ts - now_ts <= SLIDING_RENEW_THRESHOLD_SEC :
+    if exp_ts - now_ts <= settings.SLIDING_RENEW_THRESHOLD_SEC :
         set_auth_cookie(user, response)
 
 
@@ -67,15 +49,16 @@ def set_auth_cookie(user_info: UserInfo, response: Response):
     """
     Create a JWT and store it in a cookie
     """
+    settings = get_settings()
     token = create_jwt(user_info) #token = jwt.encode(user_info.__dict__, "secret", algorithm="HS256")
     response.set_cookie(
         key=_COOKIE_NAME,
         value=token,
         httponly=True,
-        secure=COOKIE_SECURE,  # TODO: set this to True (breaks the TestClient)
-        samesite=COOKIE_SAMESITE,
-        domain=COOKIE_DOMAIN,
-        max_age=ACCESS_TOKEN_EXPIRE_SECONDS,
+        secure=bool(settings.COOKIE_SECURE),  # TODO: set this to True (breaks the TestClient)
+        samesite=settings.COOKIE_SAMESITE,
+        domain=settings.COOKIE_DOMAIN,
+        max_age=settings.SESSION_TTL_SECONDS,
     )
 
 
@@ -83,7 +66,8 @@ def clear_auth_cookie(response: Response):
     """
     Clears the authentication cookie to log a user out.
     """
-    response.delete_cookie(_COOKIE_NAME, domain=COOKIE_DOMAIN)
+    settings = get_settings()
+    response.delete_cookie(_COOKIE_NAME, domain=settings.COOKIE_DOMAIN)
 
 
 def get_current_user_optional(request: Request, response: Response) -> UserInfo | None:
@@ -93,13 +77,13 @@ def get_current_user_optional(request: Request, response: Response) -> UserInfo 
     Use this when a route should be accessible to unauthenticated users,
     but you'd also like to have the user info if they are logged in.
     """
+    settings = get_settings()
     token_str = request.cookies.get(_COOKIE_NAME)
     if not token_str:
         return None
 
     try:
-        payload = jwt.decode(token_str, SECRET_KEY, algorithms=[ALGORITHM])
-        # jwt.decode(token_str, SECRET_KEY, algorithms=[ALGORITHM], issuer="feedapp", audience="feedapp_client")
+        payload = jwt.decode(token_str, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
     except ExpiredSignatureError:
         #Token is expired: clear the cookie, treat as not logged in
         clear_auth_cookie(response)
@@ -108,8 +92,11 @@ def get_current_user_optional(request: Request, response: Response) -> UserInfo 
         #Token is invalid/malformed: cleark cookie, treat as "not logged in"
         clear_auth_cookie(response)
         return None
+    except (DecodeError, InvalidTokenError): #might delete l8r
+        clear_auth_cookie(response)
+        return None
 
-    #Sanity check
+    #Sanity check (cuz im going insane w this sh)
     user_id = payload.get("id") or payload.get("sub")
     username = payload.get("username")
     email = payload.get("email")
@@ -118,13 +105,9 @@ def get_current_user_optional(request: Request, response: Response) -> UserInfo 
         clear_auth_cookie(response)
         return None
 
-    # user = UserInfo(id=token["id"],username=token["username"],email=token["email"])
     user = UserInfo(id=int(user_id), username=str(username), email=str(email))
-
     # Renew the token
-    # set_auth_cookie(user, response)
     _maybe_renew_sliding_token(payload, response, user)
-
     return user
 
 
