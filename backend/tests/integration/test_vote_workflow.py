@@ -22,6 +22,7 @@ def test_full_poll_workflow(client: TestClient):
             f"testoption_{random_suffix_1}",
             f"testoption_{random_suffix_1}",
         ],
+        "poll_perms": "public_vote",
         "expires_at": (
             datetime.datetime.now() + datetime.timedelta(days=1)
         ).isoformat(),
@@ -38,21 +39,20 @@ def test_full_poll_workflow(client: TestClient):
     # 2. Authorized vote on poll
     _ = client.post("/api/user/register", json=user_data)
     _ = client.post("/api/user/login", json=login_payload)
-    _ = client.post("/api/poll/create", json=poll_data_expiry)
-    all_polls = client.get("/api/poll/all")
-    test_poll = all_polls.json()[0]
+    returned_poll = client.post("/api/poll/create", json=poll_data_expiry)
+    poll_data = returned_poll.json()
     vote_data = {
-        "vote_option_id": test_poll["option_ids"][0],
-        "poll_id": test_poll["id"],
+        "vote_option_id": poll_data["option_ids"][0],
+        "poll_id": poll_data["id"],
     }
     register_vote = client.post("/api/vote/submit", json=vote_data)
     assert (
         register_vote.status_code == status.HTTP_201_CREATED
-    ), f"Failed to submit vote for poll {test_poll['id']}"
+    ), f"Failed to submit vote for poll {poll_data['id']}"
 
     # 3. Trying to vote on a non-existing poll.
     vote_data_non_existing_poll = {
-        "vote_option_id": test_poll["option_ids"][0],
+        "vote_option_id": poll_data["option_ids"][0],
         "poll_id": 10000,
     }
     register_vote = client.post("/api/vote/submit", json=vote_data_non_existing_poll)
@@ -63,7 +63,7 @@ def test_full_poll_workflow(client: TestClient):
     # 4. Trying to vote on a non-existing vote-option.
     vote_data_non_existing_vote_option = {
         "vote_option_id": 1000,
-        "poll_id": test_poll["id"],
+        "poll_id": poll_data["id"],
     }
     register_vote = client.post(
         "/api/vote/submit", json=vote_data_non_existing_vote_option

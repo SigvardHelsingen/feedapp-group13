@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { CreatePollData, CreatePollErrors, CreatePollResponses, DeletePollByIdData, DeletePollByIdErrors, DeletePollByIdResponses, GetAllPollsData, GetAllPollsResponses, GetPollByIdData, GetPollByIdErrors, GetPollByIdResponses, GetVotesForPollData, GetVotesForPollErrors, GetVotesForPollResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, ReadUsersMeData, ReadUsersMeResponses, RegisterUserData, RegisterUserErrors, RegisterUserResponses, SubmitVoteData, SubmitVoteErrors, SubmitVoteResponses } from './types.gen';
+import type { AssignRoleToUserData, AssignRoleToUserErrors, AssignRoleToUserResponses, CreatePollData, CreatePollErrors, CreatePollResponses, DeletePollByIdData, DeletePollByIdErrors, DeletePollByIdResponses, GetAllPollsData, GetAllPollsResponses, GetPollByIdData, GetPollByIdErrors, GetPollByIdResponses, GetUsersForPollData, GetUsersForPollErrors, GetUsersForPollResponses, GetVotesForPollData, GetVotesForPollErrors, GetVotesForPollResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, ReadUsersMeData, ReadUsersMeResponses, RegisterUserData, RegisterUserErrors, RegisterUserResponses, SubmitVoteData, SubmitVoteErrors, SubmitVoteResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -106,6 +106,30 @@ export const deletePollById = <ThrowOnError extends boolean = false>(options: Op
 export const getPollById = <ThrowOnError extends boolean = false>(options: Options<GetPollByIdData, ThrowOnError>) => {
     return (options.client ?? client).get<GetPollByIdResponses, GetPollByIdErrors, ThrowOnError>({
         url: '/poll/{poll_id}',
+        ...options
+    });
+};
+
+/**
+ * Assign Role To User
+ */
+export const assignRoleToUser = <ThrowOnError extends boolean = false>(options: Options<AssignRoleToUserData, ThrowOnError>) => {
+    return (options.client ?? client).post<AssignRoleToUserResponses, AssignRoleToUserErrors, ThrowOnError>({
+        url: '/poll/assign/',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * Get Users For Poll
+ */
+export const getUsersForPoll = <ThrowOnError extends boolean = false>(options: Options<GetUsersForPollData, ThrowOnError>) => {
+    return (options.client ?? client).get<GetUsersForPollResponses, GetUsersForPollErrors, ThrowOnError>({
+        url: '/poll/users',
         ...options
     });
 };

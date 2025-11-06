@@ -11,6 +11,11 @@ VALUES ($1, 'user_poll', $2, $3);
 INSERT INTO poll_grants (role, scope, poll_id)
 VALUES ($1, 'public_poll', $2);
 
+-- name: GetActivePollRoles :many
+SELECT pg.role, u.username FROM poll_grants pg
+INNER JOIN "user" u ON u.id = pg.user_id
+WHERE poll_id = $1 AND scope = 'user_poll' AND now() <@ period;
+
 -- name: CreateVoteOption :exec
 INSERT INTO vote_option (caption, poll_id, presentation_order)
 VALUES ($1, $2, $3);

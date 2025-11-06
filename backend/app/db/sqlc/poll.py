@@ -51,6 +51,18 @@ DELETE FROM vote_option WHERE poll_id = :p1
 """
 
 
+GET_ACTIVE_POLL_ROLES = """-- name: get_active_poll_roles \\:many
+SELECT pg.role, u.username FROM poll_grants pg
+INNER JOIN "user" u ON u.id = pg.user_id
+WHERE poll_id = :p1 AND scope = 'user_poll' AND now() <@ period
+"""
+
+
+class GetActivePollRolesRow(pydantic.BaseModel):
+    role: models.Role
+    username: str
+
+
 GET_POLL = """-- name: get_poll \\:one
 SELECT p.id, p.question, p.expires_at, u.username as creator_name,
     array_agg(vo.caption ORDER BY vo.presentation_order)\\:\\:text[] AS options,
@@ -147,6 +159,18 @@ class AsyncQuerier:
         await self._conn.execute(
             sqlalchemy.text(DELETE_VOTE_OPTIONS_FOR_POLL), {"p1": poll_id}
         )
+
+    async def get_active_poll_roles(
+        self, *, poll_id: Optional[int]
+    ) -> AsyncIterator[GetActivePollRolesRow]:
+        result = await self._conn.stream(
+            sqlalchemy.text(GET_ACTIVE_POLL_ROLES), {"p1": poll_id}
+        )
+        async for row in result:
+            yield GetActivePollRolesRow(
+                role=row[0],
+                username=row[1],
+            )
 
     async def get_poll(
         self, *, user_id: Optional[int], poll_id: int

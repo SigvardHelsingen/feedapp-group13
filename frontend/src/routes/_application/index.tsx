@@ -25,23 +25,18 @@ function App() {
           <li
             key={poll.id}
             onClick={() => handlePoll(poll.id)}
-            className="col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow dark:divide-white/10 dark:bg-gray-800/50 dark:shadow-none dark:outline dark:outline-1 dark:-outline-offset-1 dark:outline-white/10"
+            className="col-span-1 divide-y rounded-lg bg-white shadow dark:divide-white/10"
           >
             <div className="flex w-full items-center justify-between space-x-6 p-6">
               <div className="flex-1 truncate">
                 <div className="flex items-center space-x-3">
-                  <h3 className="truncate text-sm font-medium text-gray-900 dark:text-white">
+                  <h3 className="truncate text-sm font-medium text-gray-900">
                     {poll.creator_name}
                   </h3>
                 </div>
-                <p className="mt-1 truncate text-sm text-gray-500 dark:text-gray-400">
+                <p className="mt-1 truncate text-sm text-gray-500">
                   {poll.question}
                 </p>
-              </div>
-            </div>
-            <div>
-              <div className="-mt-px flex divide-x divide-gray-200 dark:divide-white/10">
-                <div className="-ml-px flex w-0 flex-1"></div>
               </div>
             </div>
           </li>
