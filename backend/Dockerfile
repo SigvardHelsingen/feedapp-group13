@@ -1,6 +1,6 @@
 FROM python:3.14-alpine AS builder
 
-RUN apk add --no-cache build-base
+RUN apk add --no-cache build-base zlib-dev
 
 WORKDIR /app
 

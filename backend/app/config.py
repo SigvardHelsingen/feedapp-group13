@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     TEST_DB_NAME: str
 
     VALKEY_CONN_STR: str
+    KAFKA_BOOTSTRAP_SERVERS: str
 
     @property
     def database_url(self) -> str:

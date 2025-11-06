@@ -1,6 +1,9 @@
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
+from app.db.kafka import VOTE_EVENT_TOPIC, KafkaProducer, VoteEvent
 from app.db.sqlc.models import Permission
 from app.utils.vote_counter import ensure_valkey_vote_table, vote_table_key
 
@@ -22,14 +25,18 @@ async def submit_vote(
     user: CurrentUserRequired,
     payload: VotePayload,
     conn: DBConnection,
-    valkey: ValkeyConnection,
+    producer: KafkaProducer,
 ):
+    recv_time = datetime.now(tz=timezone.utc)
+    recv_time = recv_time.replace(microsecond=(recv_time.microsecond // 1000) * 1000)
+    recv_unix_ms = int(recv_time.timestamp() * 1000)
+
     a = auth_queries.AsyncQuerier(conn)
     vote_access = await a.can_user_do_at(
         user_id=user.id,
         poll_id=payload.poll_id,
         permission=Permission.POLL_VOTE,
-        timestamp=None,
+        timestamp=recv_time,
     )
     if vote_access is None or not vote_access:
         raise HTTPException(
@@ -37,33 +44,23 @@ async def submit_vote(
             detail="You don't have voting rights for this poll",
         )
 
-    q = vote_queries.AsyncQuerier(conn)
     p = poll_queries.AsyncQuerier(conn)
-    poll = await p.get_poll(poll_id=payload.poll_id, user_id=user.id)
-    if poll is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Poll not found"
-        )
-    if payload.vote_option_id not in poll.option_ids:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Poll option id not found"
-        )
-
-    await ensure_valkey_vote_table(payload.poll_id, conn, valkey)
-
-    # Ensure new vote (and potential deletion of old) is written without conflicts to DB
-    deleted_vote_option_id = await q.delete_user_vote_on_poll(
-        poll_id=payload.poll_id, user_id=user.id
+    ok = await p.poll_option_belongs_to_poll(
+        poll_id=payload.poll_id, poll_option_id=payload.vote_option_id
     )
-    await q.submit_vote(user_id=user.id, vote_option_id=payload.vote_option_id)
-    await conn.commit()
+    if ok is None or not ok:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="The provided poll option is not valid for the poll",
+        )
 
-    # Atomically increment (and potentially decrement) vote counts
-    pipe = valkey.pipeline()
-    if deleted_vote_option_id is not None:
-        pipe.hincrby(vote_table_key(payload.poll_id), str(deleted_vote_option_id), -1)
-    pipe.hincrby(vote_table_key(payload.poll_id), str(payload.vote_option_id), 1)
-    _ = await pipe.execute()
+    await producer.send(
+        topic=VOTE_EVENT_TOPIC,
+        value=VoteEvent(user_id=user.id, poll_option_id=payload.vote_option_id),
+        # not a key in the sense of dictionaries, rather a hint for partitioning
+        key=payload.poll_id,
+        timestamp_ms=recv_unix_ms,
+    )
 
 
 @router.get("/{poll_id}", response_model=list[vote_queries.GetVoteCountsRow])

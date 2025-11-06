@@ -16,10 +16,10 @@ async def create_valkey_pool(settings: Settings) -> valkey.ConnectionPool:
     return pool
 
 
-async def get_valkey_connection(request: Request):
+async def _get_valkey_connection(request: Request):
     pool: valkey.ConnectionPool = request.app.state.valkey_pool
     async with valkey.Valkey(connection_pool=pool) as client:
         yield client
 
 
-ValkeyConnection = Annotated[valkey.Valkey, Depends(get_valkey_connection)]
+ValkeyConnection = Annotated[valkey.Valkey, Depends(_get_valkey_connection)]

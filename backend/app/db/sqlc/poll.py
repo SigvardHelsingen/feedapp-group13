@@ -96,6 +96,12 @@ class GetPollsRow(pydantic.BaseModel):
     option_ids: List[int]
 
 
+POLL_OPTION_BELONGS_TO_POLL = """-- name: poll_option_belongs_to_poll \\:one
+SELECT true FROM vote_option
+WHERE poll_id = :p1 AND id = :p2
+"""
+
+
 class AsyncQuerier:
     def __init__(self, conn: sqlalchemy.ext.asyncio.AsyncConnection):
         self._conn = conn
@@ -179,3 +185,16 @@ class AsyncQuerier:
                 options=row[4],
                 option_ids=row[5],
             )
+
+    async def poll_option_belongs_to_poll(
+        self, *, poll_id: int, poll_option_id: int
+    ) -> Optional[bool]:
+        row = (
+            await self._conn.execute(
+                sqlalchemy.text(POLL_OPTION_BELONGS_TO_POLL),
+                {"p1": poll_id, "p2": poll_option_id},
+            )
+        ).first()
+        if row is None:
+            return None
+        return row[0]
