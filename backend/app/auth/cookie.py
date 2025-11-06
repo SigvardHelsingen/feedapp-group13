@@ -12,8 +12,6 @@ from ..utils.user_info import UserInfo
 
 
 _COOKIE_NAME = "feedapp_session_token"
-
-
 def create_jwt(user_info: UserInfo) -> str:
     """ Create a signed JWT for the given user."""
     settings = get_settings()
