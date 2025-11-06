@@ -11,6 +11,7 @@
       "**/src/**/*",
       "**/.vscode/**/*",
       "**/index.html",
+      "!**/frontend/src/routes/_application/poll.tsx",
       "**/vite.config.js",
       "!**/src/routeTree.gen.ts",
       "!**/src/styles.css",

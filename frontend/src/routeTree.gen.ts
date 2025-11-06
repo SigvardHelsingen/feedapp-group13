@@ -9,50 +9,174 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as SignInRouteImport } from './routes/signIn'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as ApplicationRouteImport } from './routes/_application'
+import { Route as ApplicationIndexRouteImport } from './routes/_application/index'
+import { Route as ApplicationAuthenticatedCreatePollRouteImport } from './routes/_application/_authenticated/createPoll'
+import { Route as ApplicationAuthenticatedPollPollIdRouteImport } from './routes/_application/_authenticated/poll.$pollId'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const SignInRoute = SignInRouteImport.update({
+  id: '/signIn',
+  path: '/signIn',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApplicationRoute = ApplicationRouteImport.update({
+  id: '/_application',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApplicationIndexRoute = ApplicationIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ApplicationRoute,
+} as any)
+const ApplicationAuthenticatedCreatePollRoute =
+  ApplicationAuthenticatedCreatePollRouteImport.update({
+    id: '/_authenticated/createPoll',
+    path: '/createPoll',
+    getParentRoute: () => ApplicationRoute,
+  } as any)
+const ApplicationAuthenticatedPollPollIdRoute =
+  ApplicationAuthenticatedPollPollIdRouteImport.update({
+    id: '/_authenticated/poll/$pollId',
+    path: '/poll/$pollId',
+    getParentRoute: () => ApplicationRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/register': typeof RegisterRoute
+  '/signIn': typeof SignInRoute
+  '/': typeof ApplicationIndexRoute
+  '/createPoll': typeof ApplicationAuthenticatedCreatePollRoute
+  '/poll/$pollId': typeof ApplicationAuthenticatedPollPollIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/register': typeof RegisterRoute
+  '/signIn': typeof SignInRoute
+  '/': typeof ApplicationIndexRoute
+  '/createPoll': typeof ApplicationAuthenticatedCreatePollRoute
+  '/poll/$pollId': typeof ApplicationAuthenticatedPollPollIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_application': typeof ApplicationRouteWithChildren
+  '/_authenticated': typeof AuthenticatedRoute
+  '/register': typeof RegisterRoute
+  '/signIn': typeof SignInRoute
+  '/_application/': typeof ApplicationIndexRoute
+  '/_application/_authenticated/createPoll': typeof ApplicationAuthenticatedCreatePollRoute
+  '/_application/_authenticated/poll/$pollId': typeof ApplicationAuthenticatedPollPollIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/register' | '/signIn' | '/' | '/createPoll' | '/poll/$pollId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/register' | '/signIn' | '/' | '/createPoll' | '/poll/$pollId'
+  id:
+    | '__root__'
+    | '/_application'
+    | '/_authenticated'
+    | '/register'
+    | '/signIn'
+    | '/_application/'
+    | '/_application/_authenticated/createPoll'
+    | '/_application/_authenticated/poll/$pollId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  ApplicationRoute: typeof ApplicationRouteWithChildren
+  AuthenticatedRoute: typeof AuthenticatedRoute
+  RegisterRoute: typeof RegisterRoute
+  SignInRoute: typeof SignInRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/signIn': {
+      id: '/signIn'
+      path: '/signIn'
+      fullPath: '/signIn'
+      preLoaderRoute: typeof SignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_application': {
+      id: '/_application'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof ApplicationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_application/': {
+      id: '/_application/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof ApplicationIndexRouteImport
+      parentRoute: typeof ApplicationRoute
+    }
+    '/_application/_authenticated/createPoll': {
+      id: '/_application/_authenticated/createPoll'
+      path: '/createPoll'
+      fullPath: '/createPoll'
+      preLoaderRoute: typeof ApplicationAuthenticatedCreatePollRouteImport
+      parentRoute: typeof ApplicationRoute
+    }
+    '/_application/_authenticated/poll/$pollId': {
+      id: '/_application/_authenticated/poll/$pollId'
+      path: '/poll/$pollId'
+      fullPath: '/poll/$pollId'
+      preLoaderRoute: typeof ApplicationAuthenticatedPollPollIdRouteImport
+      parentRoute: typeof ApplicationRoute
     }
   }
 }
 
+interface ApplicationRouteChildren {
+  ApplicationIndexRoute: typeof ApplicationIndexRoute
+  ApplicationAuthenticatedCreatePollRoute: typeof ApplicationAuthenticatedCreatePollRoute
+  ApplicationAuthenticatedPollPollIdRoute: typeof ApplicationAuthenticatedPollPollIdRoute
+}
+
+const ApplicationRouteChildren: ApplicationRouteChildren = {
+  ApplicationIndexRoute: ApplicationIndexRoute,
+  ApplicationAuthenticatedCreatePollRoute:
+    ApplicationAuthenticatedCreatePollRoute,
+  ApplicationAuthenticatedPollPollIdRoute:
+    ApplicationAuthenticatedPollPollIdRoute,
+}
+
+const ApplicationRouteWithChildren = ApplicationRoute._addFileChildren(
+  ApplicationRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  ApplicationRoute: ApplicationRouteWithChildren,
+  AuthenticatedRoute: AuthenticatedRoute,
+  RegisterRoute: RegisterRoute,
+  SignInRoute: SignInRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
