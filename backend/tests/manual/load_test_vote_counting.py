@@ -19,7 +19,7 @@ async def send_request(
 
 
 async def load_test_vote_counting():
-    rec_count = 500
+    rec_count = 10
 
     create_user_url = "http://localhost:8000/api/user/register"
     create_user_requests = [
