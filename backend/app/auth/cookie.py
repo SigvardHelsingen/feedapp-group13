@@ -1,26 +1,62 @@
 from typing import Annotated
 
+from datetime import datetime, timedelta, timezone
+from typing import Annotated, Optional
+
 import jwt
 from fastapi import Depends, HTTPException, Request, Response, status
-from jwt.exceptions import DecodeError
+from jwt import DecodeError, ExpiredSignatureError, InvalidTokenError
 
+from ..config import get_settings
 from ..utils.user_info import UserInfo
 
+
 _COOKIE_NAME = "feedapp_session_token"
+def create_jwt(user_info: UserInfo) -> str:
+    """ Create a signed JWT for the given user."""
+    settings = get_settings()
+    now = datetime.now(timezone.utc)
+    exp = now + timedelta(seconds=settings.SESSION_TTL_SECONDS)
+
+    payload = {
+        "sub": str(user_info.id),
+        "iat": int(now.timestamp()),
+        "exp": int(exp.timestamp()),
+        "id": user_info.id,
+        "username": user_info.username,
+        "email": str(user_info.email),
+    }
+    return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+
+def _maybe_renew_sliding_token(payload: dict, response: Response, user: UserInfo):
+    """Renew the cookie only if token is close to expiry"""
+    settings = get_settings()
+    exp_ts = payload.get("exp")
+    if not isinstance(exp_ts, int):
+        # if missing/invalid, just issue a fresh one
+        set_auth_cookie(user, response)
+        return
+
+    now_ts = int(datetime.now(timezone.utc).timestamp())
+    if exp_ts - now_ts <= settings.SLIDING_RENEW_THRESHOLD_SEC :
+        set_auth_cookie(user, response)
+
 
 
 def set_auth_cookie(user_info: UserInfo, response: Response):
     """
     Create a JWT and store it in a cookie
     """
-    token = jwt.encode(user_info.__dict__, "secret", algorithm="HS256")
+    settings = get_settings()
+    token = create_jwt(user_info) #token = jwt.encode(user_info.__dict__, "secret", algorithm="HS256")
     response.set_cookie(
         key=_COOKIE_NAME,
         value=token,
         httponly=True,
-        secure=False,  # TODO: set this to True (breaks the TestClient)
-        samesite="strict",
-        max_age=3600,  # 1 hour
+        secure=bool(settings.COOKIE_SECURE),  # TODO: set this to True (breaks the TestClient)
+        samesite=settings.COOKIE_SAMESITE,
+        domain=settings.COOKIE_DOMAIN,
+        max_age=settings.SESSION_TTL_SECONDS,
     )
 
 
@@ -28,7 +64,8 @@ def clear_auth_cookie(response: Response):
     """
     Clears the authentication cookie to log a user out.
     """
-    response.delete_cookie(_COOKIE_NAME)
+    settings = get_settings()
+    response.delete_cookie(_COOKIE_NAME, domain=settings.COOKIE_DOMAIN)
 
 
 def get_current_user_optional(request: Request, response: Response) -> UserInfo | None:
@@ -38,25 +75,37 @@ def get_current_user_optional(request: Request, response: Response) -> UserInfo 
     Use this when a route should be accessible to unauthenticated users,
     but you'd also like to have the user info if they are logged in.
     """
+    settings = get_settings()
     token_str = request.cookies.get(_COOKIE_NAME)
     if not token_str:
         return None
 
-    # TODO: Validate properly
     try:
-        token = jwt.decode(token_str, "secret", algorithms=["HS256"])
+        payload = jwt.decode(token_str, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    except ExpiredSignatureError:
+        #Token is expired: clear the cookie, treat as not logged in
+        clear_auth_cookie(response)
+        return None
     except DecodeError:
-        raise
+        #Token is invalid/malformed: cleark cookie, treat as "not logged in"
+        clear_auth_cookie(response)
+        return None
+    except (DecodeError, InvalidTokenError): #might delete l8r
+        clear_auth_cookie(response)
+        return None
 
-    user = UserInfo(
-        id=token["id"],
-        username=token["username"],
-        email=token["email"],
-    )
+    #Sanity check (cuz im going insane w this sh)
+    user_id = payload.get("id") or payload.get("sub")
+    username = payload.get("username")
+    email = payload.get("email")
 
+    if user_id is None or username is None or email is None:
+        clear_auth_cookie(response)
+        return None
+
+    user = UserInfo(id=int(user_id), username=str(username), email=str(email))
     # Renew the token
-    set_auth_cookie(user, response)
-
+    _maybe_renew_sliding_token(payload, response, user)
     return user
 
 
