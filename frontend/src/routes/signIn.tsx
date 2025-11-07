@@ -40,8 +40,8 @@ function SignInComponent() {
     },
   });
   const loginFormSchema = z.object({
-    username: z.string().min(3, "Username must be at least 3 characters long"),
-    password: z.string().min(8, "Password must be at least 8 characters long"),
+    username: z.string(),
+    password: z.string(),
   });
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
@@ -110,12 +110,6 @@ function SignInComponent() {
                       <FormItem className="grid gap-2">
                         <div className="flex justify-between items-center">
                           <FormLabel htmlFor="password">Password</FormLabel>
-                          <Link
-                            to="/register"
-                            className="ml-auto inline-block text-sm underline"
-                          >
-                            Forgot your password?
-                          </Link>
                         </div>
                         <FormControl>
                           <InputPassword

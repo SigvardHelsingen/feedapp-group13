@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { createPoll, deletePollById, getAllPolls, getPollById, getVotesForPoll, login, logout, type Options, readUsersMe, registerUser, submitVote } from '../sdk.gen';
-import type { CreatePollData, CreatePollError, DeletePollByIdData, DeletePollByIdError, DeletePollByIdResponse, GetAllPollsData, GetPollByIdData, GetVotesForPollData, LoginData, LoginError, LoginResponse, LogoutData, LogoutResponse, ReadUsersMeData, RegisterUserData, RegisterUserError, RegisterUserResponse, SubmitVoteData, SubmitVoteError } from '../types.gen';
+import { assignRoleToUser, createPoll, deletePollById, getAllPolls, getPollById, getUsersForPoll, getVotesForPoll, login, logout, type Options, readUsersMe, registerUser, submitVote } from '../sdk.gen';
+import type { AssignRoleToUserData, AssignRoleToUserError, AssignRoleToUserResponse, CreatePollData, CreatePollError, DeletePollByIdData, DeletePollByIdError, DeletePollByIdResponse, GetAllPollsData, GetPollByIdData, GetUsersForPollData, GetVotesForPollData, LoginData, LoginError, LoginResponse, LogoutData, LogoutResponse, ReadUsersMeData, RegisterUserData, RegisterUserError, RegisterUserResponse, SubmitVoteData, SubmitVoteError } from '../types.gen';
 
 /**
  * Register User
@@ -183,6 +183,43 @@ export const getPollByIdOptions = (options: Options<GetPollByIdData>) => {
             return data;
         },
         queryKey: getPollByIdQueryKey(options)
+    });
+};
+
+/**
+ * Assign Role To User
+ */
+export const assignRoleToUserMutation = (options?: Partial<Options<AssignRoleToUserData>>): UseMutationOptions<AssignRoleToUserResponse, AssignRoleToUserError, Options<AssignRoleToUserData>> => {
+    const mutationOptions: UseMutationOptions<AssignRoleToUserResponse, AssignRoleToUserError, Options<AssignRoleToUserData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await assignRoleToUser({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getUsersForPollQueryKey = (options: Options<GetUsersForPollData>) => createQueryKey('getUsersForPoll', options);
+
+/**
+ * Get Users For Poll
+ */
+export const getUsersForPollOptions = (options: Options<GetUsersForPollData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await getUsersForPoll({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getUsersForPollQueryKey(options)
     });
 };
 

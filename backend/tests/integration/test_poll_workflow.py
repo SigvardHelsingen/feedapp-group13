@@ -28,6 +28,7 @@ def test_full_poll_workflow(client: TestClient):
             f"testoption_{random_suffix_1}",
             f"testoption_{random_suffix_1}",
         ],
+        "poll_perms": "public_view",
         "expires_at": None,
     }
     poll_data_expiry = {
@@ -37,6 +38,7 @@ def test_full_poll_workflow(client: TestClient):
             f"testoption_{random_suffix_2}",
             f"testoption_{random_suffix_2}",
         ],
+        "poll_perms": "public_view",
         "expires_at": (
             datetime.datetime.now() + datetime.timedelta(days=1)
         ).isoformat(),
@@ -51,8 +53,8 @@ def test_full_poll_workflow(client: TestClient):
     ), "Failed to create poll, no user found"
 
     # 2. Authorized user can create a poll without expiry date.
-    client.post("/api/user/register", json=user_data_1)
-    client.post("api/user/login", json=login_payload_1)
+    _ = client.post("/api/user/register", json=user_data_1)
+    _ = client.post("api/user/login", json=login_payload_1)
     created_response = client.post("api/poll/create", json=poll_data_non_expiry)
     assert (
         created_response.status_code == status.HTTP_201_CREATED
