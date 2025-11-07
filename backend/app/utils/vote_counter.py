@@ -1,6 +1,5 @@
 import asyncio
 from contextlib import asynccontextmanager
-from typing import Awaitable
 
 from app.db.db import DBConnection
 from app.db.sqlc import vote as vote_queries

@@ -15,6 +15,7 @@ class VoteEvent(BaseModel):
     poll_option_id: int
 
 
+# TODO: dev/test/docker/prod environment distinction
 async def create_kafka_producer(settings: Settings):
     producer = AIOKafkaProducer(
         bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,

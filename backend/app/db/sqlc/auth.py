@@ -39,8 +39,8 @@ class AsyncQuerier:
     async def can_user_do_at(
         self,
         *,
-        user_id: int,
-        poll_id: int,
+        user_id: Optional[int],
+        poll_id: Optional[int],
         permission: models.Permission,
         timestamp: Optional[Any]
     ) -> Optional[bool]:
