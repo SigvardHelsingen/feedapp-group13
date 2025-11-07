@@ -327,8 +327,10 @@ export type CreatePollResponses = {
     /**
      * Successful Response
      */
-    201: unknown;
+    201: GetPollRow;
 };
+
+export type CreatePollResponse = CreatePollResponses[keyof CreatePollResponses];
 
 export type GetAllPollsData = {
     body?: never;
@@ -343,7 +345,7 @@ export type GetAllPollsResponses = {
      *
      * Successful Response
      */
-    200: Array<GetPollsRow>;
+    201: Array<GetPollsRow>;
 };
 
 export type GetAllPollsResponse = GetAllPollsResponses[keyof GetAllPollsResponses];
@@ -445,14 +447,14 @@ export type AssignRoleToUserResponse = AssignRoleToUserResponses[keyof AssignRol
 
 export type GetUsersForPollData = {
     body?: never;
-    path?: never;
-    query: {
+    path: {
         /**
          * Poll Id
          */
         poll_id: number;
     };
-    url: '/poll/users';
+    query?: never;
+    url: '/poll/users{poll_id}';
 };
 
 export type GetUsersForPollErrors = {
@@ -466,7 +468,7 @@ export type GetUsersForPollError = GetUsersForPollErrors[keyof GetUsersForPollEr
 
 export type GetUsersForPollResponses = {
     /**
-     * Response Get Users For Poll Poll Users Get
+     * Response Get Users For Poll Poll Users Poll Id  Get
      *
      * Successful Response
      */
@@ -529,3 +531,31 @@ export type GetVotesForPollResponses = {
 };
 
 export type GetVotesForPollResponse = GetVotesForPollResponses[keyof GetVotesForPollResponses];
+
+export type StreamVoteUpdatesData = {
+    body?: never;
+    path: {
+        /**
+         * Poll Id
+         */
+        poll_id: number;
+    };
+    query?: never;
+    url: '/vote/stream/{poll_id}';
+};
+
+export type StreamVoteUpdatesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type StreamVoteUpdatesError = StreamVoteUpdatesErrors[keyof StreamVoteUpdatesErrors];
+
+export type StreamVoteUpdatesResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};

@@ -1,4 +1,5 @@
 import asyncio
+import json
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, Request, status
@@ -120,11 +121,13 @@ async def stream_vote_updates(
 
         # Get initial data so the client won't have to wait for an update
         await ensure_valkey_vote_table(poll_id, conn, valkey_conn)
-        vote_counts: dict[int, int] = await valkey_conn.hgetall(vote_table_key(poll_id))
+        vote_counts: dict[bytes, bytes] = await valkey_conn.hgetall(
+            vote_table_key(poll_id)
+        )
         initial_data = [
             {
-                "vote_option_id": k,
-                "vote_count": v,
+                "vote_option_id": int(k.decode()),
+                "vote_count": int(v.decode()),
             }
             for k, v in vote_counts.items()
         ]
@@ -145,7 +148,7 @@ async def stream_vote_updates(
 
         try:
             # Send initial vote counts
-            yield {"event": "vote_update", "data": initial_data}
+            yield {"event": "vote_update", "data": json.dumps(initial_data)}
 
             while True:
                 if await request.is_disconnected():
@@ -165,7 +168,7 @@ async def stream_vote_updates(
                         for row in event.vote_counts
                     ]
 
-                    yield {"event": "vote_update", "data": data}
+                    yield {"event": "vote_update", "data": json.dumps(data)}
                 except asyncio.TimeoutError:
                     yield {"comment": "keepalive"}
         finally:

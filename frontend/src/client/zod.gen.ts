@@ -192,6 +192,11 @@ export const zCreatePollData = z.object({
     query: z.optional(z.never())
 });
 
+/**
+ * Successful Response
+ */
+export const zCreatePollResponse = zGetPollRow;
+
 export const zGetAllPollsData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
@@ -248,14 +253,14 @@ export const zAssignRoleToUserResponse = z.array(z.int());
 
 export const zGetUsersForPollData = z.object({
     body: z.optional(z.never()),
-    path: z.optional(z.never()),
-    query: z.object({
+    path: z.object({
         poll_id: z.int()
-    })
+    }),
+    query: z.optional(z.never())
 });
 
 /**
- * Response Get Users For Poll Poll Users Get
+ * Response Get Users For Poll Poll Users Poll Id  Get
  *
  * Successful Response
  */
@@ -281,3 +286,11 @@ export const zGetVotesForPollData = z.object({
  * Successful Response
  */
 export const zGetVotesForPollResponse = z.array(zGetVoteCountsRow);
+
+export const zStreamVoteUpdatesData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        poll_id: z.int()
+    }),
+    query: z.optional(z.never())
+});

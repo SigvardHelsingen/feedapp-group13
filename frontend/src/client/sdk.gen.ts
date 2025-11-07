@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AssignRoleToUserData, AssignRoleToUserErrors, AssignRoleToUserResponses, CreatePollData, CreatePollErrors, CreatePollResponses, DeletePollByIdData, DeletePollByIdErrors, DeletePollByIdResponses, GetAllPollsData, GetAllPollsResponses, GetPollByIdData, GetPollByIdErrors, GetPollByIdResponses, GetUsersForPollData, GetUsersForPollErrors, GetUsersForPollResponses, GetVotesForPollData, GetVotesForPollErrors, GetVotesForPollResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, ReadUsersMeData, ReadUsersMeResponses, RegisterUserData, RegisterUserErrors, RegisterUserResponses, SubmitVoteData, SubmitVoteErrors, SubmitVoteResponses } from './types.gen';
+import type { AssignRoleToUserData, AssignRoleToUserErrors, AssignRoleToUserResponses, CreatePollData, CreatePollErrors, CreatePollResponses, DeletePollByIdData, DeletePollByIdErrors, DeletePollByIdResponses, GetAllPollsData, GetAllPollsResponses, GetPollByIdData, GetPollByIdErrors, GetPollByIdResponses, GetUsersForPollData, GetUsersForPollErrors, GetUsersForPollResponses, GetVotesForPollData, GetVotesForPollErrors, GetVotesForPollResponses, LoginData, LoginErrors, LoginResponses, LogoutData, LogoutResponses, ReadUsersMeData, ReadUsersMeResponses, RegisterUserData, RegisterUserErrors, RegisterUserResponses, StreamVoteUpdatesData, StreamVoteUpdatesErrors, StreamVoteUpdatesResponses, SubmitVoteData, SubmitVoteErrors, SubmitVoteResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -129,7 +129,7 @@ export const assignRoleToUser = <ThrowOnError extends boolean = false>(options: 
  */
 export const getUsersForPoll = <ThrowOnError extends boolean = false>(options: Options<GetUsersForPollData, ThrowOnError>) => {
     return (options.client ?? client).get<GetUsersForPollResponses, GetUsersForPollErrors, ThrowOnError>({
-        url: '/poll/users',
+        url: '/poll/users{poll_id}',
         ...options
     });
 };
@@ -150,10 +150,26 @@ export const submitVote = <ThrowOnError extends boolean = false>(options: Option
 
 /**
  * Get Votes For Poll
+ *
+ * This endpoint is deprecated, use the SSE one instead
+ *
+ * @deprecated
  */
 export const getVotesForPoll = <ThrowOnError extends boolean = false>(options: Options<GetVotesForPollData, ThrowOnError>) => {
     return (options.client ?? client).get<GetVotesForPollResponses, GetVotesForPollErrors, ThrowOnError>({
         url: '/vote/{poll_id}',
+        ...options
+    });
+};
+
+/**
+ * Stream Vote Updates
+ *
+ * SSE endpoint for live poll vote counts
+ */
+export const streamVoteUpdates = <ThrowOnError extends boolean = false>(options: Options<StreamVoteUpdatesData, ThrowOnError>) => {
+    return (options.client ?? client).get<StreamVoteUpdatesResponses, StreamVoteUpdatesErrors, ThrowOnError>({
+        url: '/vote/stream/{poll_id}',
         ...options
     });
 };

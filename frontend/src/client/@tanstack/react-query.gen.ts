@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { assignRoleToUser, createPoll, deletePollById, getAllPolls, getPollById, getUsersForPoll, getVotesForPoll, login, logout, type Options, readUsersMe, registerUser, submitVote } from '../sdk.gen';
-import type { AssignRoleToUserData, AssignRoleToUserError, AssignRoleToUserResponse, CreatePollData, CreatePollError, DeletePollByIdData, DeletePollByIdError, DeletePollByIdResponse, GetAllPollsData, GetPollByIdData, GetUsersForPollData, GetVotesForPollData, LoginData, LoginError, LoginResponse, LogoutData, LogoutResponse, ReadUsersMeData, RegisterUserData, RegisterUserError, RegisterUserResponse, SubmitVoteData, SubmitVoteError } from '../types.gen';
+import { assignRoleToUser, createPoll, deletePollById, getAllPolls, getPollById, getUsersForPoll, getVotesForPoll, login, logout, type Options, readUsersMe, registerUser, streamVoteUpdates, submitVote } from '../sdk.gen';
+import type { AssignRoleToUserData, AssignRoleToUserError, AssignRoleToUserResponse, CreatePollData, CreatePollError, CreatePollResponse, DeletePollByIdData, DeletePollByIdError, DeletePollByIdResponse, GetAllPollsData, GetPollByIdData, GetUsersForPollData, GetVotesForPollData, LoginData, LoginError, LoginResponse, LogoutData, LogoutResponse, ReadUsersMeData, RegisterUserData, RegisterUserError, RegisterUserResponse, StreamVoteUpdatesData, SubmitVoteData, SubmitVoteError } from '../types.gen';
 
 /**
  * Register User
@@ -115,8 +115,8 @@ export const readUsersMeOptions = (options?: Options<ReadUsersMeData>) => {
 /**
  * Create Poll
  */
-export const createPollMutation = (options?: Partial<Options<CreatePollData>>): UseMutationOptions<unknown, CreatePollError, Options<CreatePollData>> => {
-    const mutationOptions: UseMutationOptions<unknown, CreatePollError, Options<CreatePollData>> = {
+export const createPollMutation = (options?: Partial<Options<CreatePollData>>): UseMutationOptions<CreatePollResponse, CreatePollError, Options<CreatePollData>> => {
+    const mutationOptions: UseMutationOptions<CreatePollResponse, CreatePollError, Options<CreatePollData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await createPoll({
                 ...options,
@@ -244,6 +244,10 @@ export const getVotesForPollQueryKey = (options: Options<GetVotesForPollData>) =
 
 /**
  * Get Votes For Poll
+ *
+ * This endpoint is deprecated, use the SSE one instead
+ *
+ * @deprecated
  */
 export const getVotesForPollOptions = (options: Options<GetVotesForPollData>) => {
     return queryOptions({
@@ -257,5 +261,27 @@ export const getVotesForPollOptions = (options: Options<GetVotesForPollData>) =>
             return data;
         },
         queryKey: getVotesForPollQueryKey(options)
+    });
+};
+
+export const streamVoteUpdatesQueryKey = (options: Options<StreamVoteUpdatesData>) => createQueryKey('streamVoteUpdates', options);
+
+/**
+ * Stream Vote Updates
+ *
+ * SSE endpoint for live poll vote counts
+ */
+export const streamVoteUpdatesOptions = (options: Options<StreamVoteUpdatesData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await streamVoteUpdates({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: streamVoteUpdatesQueryKey(options)
     });
 };
