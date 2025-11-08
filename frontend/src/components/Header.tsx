@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Home, Menu, X } from "lucide-react";
+import { Home, Menu, X, LogIn, LogOut } from "lucide-react";
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { logoutMutation } from "@/client/@tanstack/react-query.gen";
@@ -45,7 +45,7 @@ export default function Header() {
             onClick={() => onLogout()}
             className="flex items-center gap-3 p-3 rounded-lg hover:bg-[#333333] transition-colors"
           >
-            <Home size={20} />
+            <LogOut size={20} />
             <span className="font-medium">Log out</span>
           </Link>
         ) : (
@@ -53,7 +53,7 @@ export default function Header() {
             to="/signIn"
             className="flex items-center gap-3 p-3 rounded-lg hover:bg-[#333333] transition-colors"
           >
-            <Home size={20} />
+            <LogIn size={20} />
             <span className="font-medium">Log in</span>
           </Link>
         )}

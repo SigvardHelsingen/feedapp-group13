@@ -11,6 +11,18 @@ import sqlalchemy.ext.asyncio
 
 from app.db.sqlc import models
 
+ASSIGN_PUBLIC_PERMS = """-- name: assign_public_perms \\:exec
+INSERT INTO poll_grants (role, scope, poll_id)
+VALUES (:p1, 'public_poll', :p2)
+"""
+
+
+ASSIGN_ROLE = """-- name: assign_role \\:exec
+INSERT INTO poll_grants (role, scope, user_id, poll_id)
+VALUES (:p1, 'user_poll', :p2, :p3)
+"""
+
+
 CREATE_POLL = """-- name: create_poll \\:one
 INSERT INTO poll (question, created_by, expires_at)
 VALUES (:p1, :p2, :p3)
@@ -24,6 +36,11 @@ VALUES (:p1, :p2, :p3)
 """
 
 
+DELETE_GRANTS_FOR_POLL = """-- name: delete_grants_for_poll \\:exec
+DELETE FROM poll_grants WHERE poll_id = :p1
+"""
+
+
 DELETE_POLL = """-- name: delete_poll \\:exec
 DELETE FROM poll WHERE id = :p1
 """
@@ -32,6 +49,18 @@ DELETE FROM poll WHERE id = :p1
 DELETE_VOTE_OPTIONS_FOR_POLL = """-- name: delete_vote_options_for_poll \\:exec
 DELETE FROM vote_option WHERE poll_id = :p1
 """
+
+
+GET_ACTIVE_POLL_ROLES = """-- name: get_active_poll_roles \\:many
+SELECT pg.role, u.username FROM poll_grants pg
+INNER JOIN "user" u ON u.id = pg.user_id
+WHERE poll_id = :p1 AND scope = 'user_poll' AND now() <@ period
+"""
+
+
+class GetActivePollRolesRow(pydantic.BaseModel):
+    role: models.Role
+    username: str
 
 
 GET_POLL = """-- name: get_poll \\:one
@@ -43,7 +72,7 @@ FROM poll p
 INNER JOIN vote_option vo ON p.id = vo.poll_id
 INNER JOIN "user" u ON p.created_by = u.id
 LEFT JOIN vote v ON v.vote_option_id = vo.id AND v.user_id = :p1
-WHERE p.id = :p2
+WHERE p.id = :p2 AND can_user_do_at(:p1, :p2, 'poll\\:view')
 GROUP BY p.id, u.id
 """
 
@@ -65,6 +94,7 @@ SELECT p.id, p.question, p.expires_at, u.username as creator_name,
 FROM poll p
 INNER JOIN vote_option vo ON p.id = vo.poll_id
 INNER JOIN "user" u ON p.created_by = u.id
+WHERE can_user_do_at(:p1, p.id, 'poll\\:view')
 GROUP BY p.id, u.id
 """
 
@@ -81,6 +111,20 @@ class GetPollsRow(pydantic.BaseModel):
 class AsyncQuerier:
     def __init__(self, conn: sqlalchemy.ext.asyncio.AsyncConnection):
         self._conn = conn
+
+    async def assign_public_perms(
+        self, *, role: models.Role, poll_id: Optional[int]
+    ) -> None:
+        await self._conn.execute(
+            sqlalchemy.text(ASSIGN_PUBLIC_PERMS), {"p1": role, "p2": poll_id}
+        )
+
+    async def assign_role(
+        self, *, role: models.Role, user_id: Optional[int], poll_id: Optional[int]
+    ) -> None:
+        await self._conn.execute(
+            sqlalchemy.text(ASSIGN_ROLE), {"p1": role, "p2": user_id, "p3": poll_id}
+        )
 
     async def create_poll(
         self, *, question: str, created_by: int, expires_at: Optional[datetime.datetime]
@@ -103,6 +147,11 @@ class AsyncQuerier:
             {"p1": caption, "p2": poll_id, "p3": presentation_order},
         )
 
+    async def delete_grants_for_poll(self, *, poll_id: Optional[int]) -> None:
+        await self._conn.execute(
+            sqlalchemy.text(DELETE_GRANTS_FOR_POLL), {"p1": poll_id}
+        )
+
     async def delete_poll(self, *, id: int) -> None:
         await self._conn.execute(sqlalchemy.text(DELETE_POLL), {"p1": id})
 
@@ -110,6 +159,18 @@ class AsyncQuerier:
         await self._conn.execute(
             sqlalchemy.text(DELETE_VOTE_OPTIONS_FOR_POLL), {"p1": poll_id}
         )
+
+    async def get_active_poll_roles(
+        self, *, poll_id: Optional[int]
+    ) -> AsyncIterator[GetActivePollRolesRow]:
+        result = await self._conn.stream(
+            sqlalchemy.text(GET_ACTIVE_POLL_ROLES), {"p1": poll_id}
+        )
+        async for row in result:
+            yield GetActivePollRolesRow(
+                role=row[0],
+                username=row[1],
+            )
 
     async def get_poll(
         self, *, user_id: Optional[int], poll_id: int
@@ -131,8 +192,8 @@ class AsyncQuerier:
             user_vote=row[6],
         )
 
-    async def get_polls(self) -> AsyncIterator[GetPollsRow]:
-        result = await self._conn.stream(sqlalchemy.text(GET_POLLS))
+    async def get_polls(self, *, user_id: Optional[int]) -> AsyncIterator[GetPollsRow]:
+        result = await self._conn.stream(sqlalchemy.text(GET_POLLS), {"p1": user_id})
         async for row in result:
             yield GetPollsRow(
                 id=row[0],

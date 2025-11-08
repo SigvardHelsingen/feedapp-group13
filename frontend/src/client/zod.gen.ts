@@ -3,18 +3,6 @@
 import { z } from 'zod';
 
 /**
- * CreatePollPayload
- */
-export const zCreatePollPayload = z.object({
-    question: z.string(),
-    options: z.array(z.string()),
-    expires_at: z.union([
-        z.iso.datetime(),
-        z.null()
-    ])
-});
-
-/**
  * CreateUserPayload
  */
 export const zCreateUserPayload = z.object({
@@ -68,6 +56,54 @@ export const zGetVoteCountsRow = z.object({
 export const zLoginPayload = z.object({
     username: z.string(),
     password: z.string()
+});
+
+/**
+ * PollPerms
+ */
+export const zPollPerms = z.enum([
+    'public_view',
+    'public_vote',
+    'private'
+]);
+
+/**
+ * CreatePollPayload
+ */
+export const zCreatePollPayload = z.object({
+    question: z.string(),
+    options: z.array(z.string()),
+    expires_at: z.union([
+        z.iso.datetime(),
+        z.null()
+    ]),
+    poll_perms: zPollPerms
+});
+
+/**
+ * Role
+ */
+export const zRole = z.enum([
+    'creator',
+    'voter',
+    'viewer',
+    'moderator'
+]);
+
+/**
+ * GetActivePollRolesRow
+ */
+export const zGetActivePollRolesRow = z.object({
+    role: zRole,
+    username: z.string()
+});
+
+/**
+ * GiveAccessPayload
+ */
+export const zGiveAccessPayload = z.object({
+    role: zRole,
+    user_id: z.int()
 });
 
 /**
@@ -194,6 +230,36 @@ export const zGetPollByIdData = z.object({
  * Successful Response
  */
 export const zGetPollByIdResponse = zGetPollRow;
+
+export const zAssignRoleToUserData = z.object({
+    body: z.array(zGiveAccessPayload),
+    path: z.optional(z.never()),
+    query: z.object({
+        poll_id: z.int()
+    })
+});
+
+/**
+ * Response Assign Role To User Poll Assign  Post
+ *
+ * Successful Response
+ */
+export const zAssignRoleToUserResponse = z.array(z.int());
+
+export const zGetUsersForPollData = z.object({
+    body: z.optional(z.never()),
+    path: z.optional(z.never()),
+    query: z.object({
+        poll_id: z.int()
+    })
+});
+
+/**
+ * Response Get Users For Poll Poll Users Get
+ *
+ * Successful Response
+ */
+export const zGetUsersForPollResponse = z.array(zGetActivePollRolesRow);
 
 export const zSubmitVoteData = z.object({
     body: zVotePayload,

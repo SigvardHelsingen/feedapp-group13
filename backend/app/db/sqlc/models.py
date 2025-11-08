@@ -2,9 +2,30 @@
 # versions:
 #   sqlc v1.30.0
 import datetime
-from typing import Optional
+import enum
+from typing import Any, Optional
 
 import pydantic
+
+
+class Permission(str, enum.Enum):
+    POLL_ASSIGN_ROLE = "poll:assign_role"
+    POLL_DELETE = "poll:delete"
+    POLL_VOTE = "poll:vote"
+    POLL_VIEW = "poll:view"
+
+
+class Role(str, enum.Enum):
+    CREATOR = "creator"
+    VOTER = "voter"
+    VIEWER = "viewer"
+    MODERATOR = "moderator"
+
+
+class Scope(str, enum.Enum):
+    USER_POLL = "user_poll"
+    USER_GLOBAL = "user_global"
+    PUBLIC_POLL = "public_poll"
 
 
 class Poll(pydantic.BaseModel):
@@ -13,6 +34,22 @@ class Poll(pydantic.BaseModel):
     expires_at: Optional[datetime.datetime]
     created_by: int
     created_at: Optional[datetime.datetime]
+
+
+class PollGrant(pydantic.BaseModel):
+    id: int
+    role: Role
+    scope: Scope
+    user_id: Optional[int]
+    poll_id: Optional[int]
+    granted_at: Optional[datetime.datetime]
+    expires_at: Optional[datetime.datetime]
+    period: Optional[Any]
+
+
+class RolePermission(pydantic.BaseModel):
+    role: Role
+    permission: Permission
 
 
 class User(pydantic.BaseModel):

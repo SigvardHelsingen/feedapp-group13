@@ -20,6 +20,7 @@ export type CreatePollPayload = {
      * Expires At
      */
     expires_at: string | null;
+    poll_perms: PollPerms;
 };
 
 /**
@@ -38,6 +39,17 @@ export type CreateUserPayload = {
      * Password
      */
     password: string;
+};
+
+/**
+ * GetActivePollRolesRow
+ */
+export type GetActivePollRolesRow = {
+    role: Role;
+    /**
+     * Username
+     */
+    username: string;
 };
 
 /**
@@ -119,6 +131,17 @@ export type GetVoteCountsRow = {
 };
 
 /**
+ * GiveAccessPayload
+ */
+export type GiveAccessPayload = {
+    role: Role;
+    /**
+     * User Id
+     */
+    user_id: number;
+};
+
+/**
  * HTTPValidationError
  */
 export type HttpValidationError = {
@@ -141,6 +164,16 @@ export type LoginPayload = {
      */
     password: string;
 };
+
+/**
+ * PollPerms
+ */
+export type PollPerms = 'public_view' | 'public_vote' | 'private';
+
+/**
+ * Role
+ */
+export type Role = 'creator' | 'voter' | 'viewer' | 'moderator';
 
 /**
  * UserInfo
@@ -374,6 +407,73 @@ export type GetPollByIdResponses = {
 };
 
 export type GetPollByIdResponse = GetPollByIdResponses[keyof GetPollByIdResponses];
+
+export type AssignRoleToUserData = {
+    /**
+     * Payload
+     */
+    body: Array<GiveAccessPayload>;
+    path?: never;
+    query: {
+        /**
+         * Poll Id
+         */
+        poll_id: number;
+    };
+    url: '/poll/assign/';
+};
+
+export type AssignRoleToUserErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AssignRoleToUserError = AssignRoleToUserErrors[keyof AssignRoleToUserErrors];
+
+export type AssignRoleToUserResponses = {
+    /**
+     * Response Assign Role To User Poll Assign  Post
+     *
+     * Successful Response
+     */
+    200: Array<number>;
+};
+
+export type AssignRoleToUserResponse = AssignRoleToUserResponses[keyof AssignRoleToUserResponses];
+
+export type GetUsersForPollData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Poll Id
+         */
+        poll_id: number;
+    };
+    url: '/poll/users';
+};
+
+export type GetUsersForPollErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetUsersForPollError = GetUsersForPollErrors[keyof GetUsersForPollErrors];
+
+export type GetUsersForPollResponses = {
+    /**
+     * Response Get Users For Poll Poll Users Get
+     *
+     * Successful Response
+     */
+    200: Array<GetActivePollRolesRow>;
+};
+
+export type GetUsersForPollResponse = GetUsersForPollResponses[keyof GetUsersForPollResponses];
 
 export type SubmitVoteData = {
     body: VotePayload;
