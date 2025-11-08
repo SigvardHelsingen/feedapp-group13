@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.config import Settings
-from app.db.db import get_db_connection
+from app.db.db import _get_db_connection
 from app.main import app
 
 
@@ -53,7 +53,7 @@ def client(test_settings: Settings) -> Generator[TestClient, None, None]:
         async with engine.begin() as conn:
             yield conn
 
-    app.dependency_overrides[get_db_connection] = get_db_test_connection
+    app.dependency_overrides[_get_db_connection] = get_db_test_connection
 
     with TestClient(app) as test_client:
         yield test_client

@@ -3,7 +3,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
 
+from app.db.kafka import create_kafka_producer
 from app.db.valkey import create_valkey_pool
+from app.sse.manager import SSEManager
 
 from .config import get_settings
 from .db.db import create_db_engine
@@ -27,7 +29,22 @@ async def lifespan(app: FastAPI):
     pool = await create_valkey_pool(settings)
     app.state.valkey_pool = pool
 
+    print("Creating Kafka Producer")
+    producer = await create_kafka_producer(settings)
+    app.state.kafka_producer = producer
+
+    print("Creating SSE Manager")
+    sse_manager = SSEManager(
+        settings.VALKEY_CONN_STR,
+        max_connections_per_user=settings.SSE_MAX_CONNECTIONS_PER_USER,
+        max_connections_total=settings.SSE_MAX_CONNECTIONS_TOTAL,
+    )
+    app.state.sse_manager = sse_manager
+
     yield
+
+    print("Shutting down SSE Manager")
+    await sse_manager.shutdown()
 
     print("Disposing Valkey connection pool")
     await pool.aclose()
@@ -35,6 +52,9 @@ async def lifespan(app: FastAPI):
     print("Disposing SQLAlchemy engine...")
     await engine.dispose()
     print("SQLAlchemy engine disposed.")
+
+    print("Closing Kafka Producer")
+    await producer.stop()
 
 
 app = FastAPI(

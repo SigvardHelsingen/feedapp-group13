@@ -2,14 +2,13 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   getPollByIdOptions,
   submitVoteMutation,
-  getVotesForPollOptions,
-  getUsersForPollOptions,
 } from "@/client/@tanstack/react-query.gen";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import { Pie } from "react-chartjs-2";
+import { useLivePollVoteCounts } from "@/lib/pollVoteUpdates";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 ChartJS.defaults.color = "#f5f7f8";
@@ -36,19 +35,13 @@ function PollComponent() {
     retry: false,
   });
 
-  const { data: users } = useQuery({
-    ...getUsersForPollOptions({
-      query: {
-        poll_id: parseInt(pollId, 10),
-      },
-    }),
-  });
-
   useEffect(() => {
     if (error != null) {
       navigate({ to: "/" });
     }
   });
+
+  const pollOptionVotes = useLivePollVoteCounts(parseInt(pollId, 10));
 
   const [status, setStatus] = useState("");
   const submitVote = useMutation({
@@ -58,18 +51,13 @@ function PollComponent() {
     },
     onSuccess: () => {
       setStatus("Registration completed");
-      refetchPoll();
-      refetchVotes();
+
+      // Hopefully this will call after the update has been processed.
+      // TODO: Ideally, we should also optimistically update the state it refers to.
+      setTimeout(refetchPoll, 300);
     },
   });
 
-  const { data: pollOptionVotes, refetch: refetchVotes } = useQuery({
-    ...getVotesForPollOptions({
-      path: {
-        poll_id: parseInt(pollId, 10),
-      },
-    }),
-  });
   function onSubmitVote(id: number) {
     submitVote.mutate({
       body: {
@@ -78,24 +66,9 @@ function PollComponent() {
       },
     });
   }
-  const [votes, setVotes] = useState<number[]>();
 
-  useEffect(() => {
-    if (pollOptionVotes != undefined) {
-      renderVotes();
-    }
-  }, [pollOptionVotes]);
-  function renderVotes() {
-    var res: number[] = [];
-    if (pollOptionVotes != undefined) {
-      console.log(JSON.stringify(pollOptionVotes));
-      pollOptionVotes.map((item) => {
-        res.push(item.vote_count);
-      });
-      setVotes(res);
-    }
-  }
-  console.log(votes);
+  const votes = pollOptionVotes.map((item) => item.vote_count);
+
   const chartData = {
     labels: selectedPoll?.options,
     datasets: [
@@ -122,7 +95,7 @@ function PollComponent() {
       },
     ],
   };
-  console.log(JSON.stringify(selectedPoll));
+
   return (
     <div className="p-6 min-h-screen w-full flex justify-center items-center">
       <div className="flex flex-col md:flex-row gap-8 justify-center items-start w-full max-w-6xl">

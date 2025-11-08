@@ -20,6 +20,10 @@ WHERE poll_id = $1 AND scope = 'user_poll' AND now() <@ period;
 INSERT INTO vote_option (caption, poll_id, presentation_order)
 VALUES ($1, $2, $3);
 
+-- name: PollOptionBelongsToPoll :one
+SELECT true FROM vote_option
+WHERE poll_id = sqlc.arg(poll_id) AND id = sqlc.arg(poll_option_id);
+
 -- name: GetPoll :one
 SELECT p.id, p.question, p.expires_at, u.username as creator_name,
     array_agg(vo.caption ORDER BY vo.presentation_order)::text[] AS options,

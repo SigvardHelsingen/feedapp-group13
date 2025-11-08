@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     TEST_DB_NAME: str
 
     VALKEY_CONN_STR: str
+    KAFKA_BOOTSTRAP_SERVERS: str
+
+    SSE_MAX_CONNECTIONS_PER_USER: int = 5
+    SSE_MAX_CONNECTIONS_TOTAL: int = 1000
 
     @property
     def database_url(self) -> str:

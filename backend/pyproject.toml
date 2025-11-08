@@ -14,6 +14,8 @@ dependencies = [
     "argon2-cffi>=25.1.0",
     "gunicorn>=23.0.0",
     "valkey[libvalkey]>=6.1.1",
+    "aiokafka>=0.12.0",
+    "sse-starlette>=3.0.3",
 ]
 
 [tool.setuptools]

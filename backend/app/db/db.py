@@ -16,17 +16,16 @@ def create_db_engine(settings: Settings) -> tuple[AsyncEngine, asyncio.Semaphore
     return engine, db_semaphore
 
 
-async def get_db_connection(request: Request) -> AsyncGenerator[AsyncConnection, None]:
+async def _get_db_connection(request: Request) -> AsyncGenerator[AsyncConnection, None]:
     """
     Provides a connection and a transaction context.
     Handles transaction (commit on success, rollback on error) automatically.
     """
     db_semaphore: asyncio.Semaphore = request.app.state.db_semaphore
     engine: AsyncEngine = request.app.state.db_engine
-    async with db_semaphore:
-        async with engine.begin() as conn:
-            yield conn
+    async with db_semaphore, engine.begin() as conn:
+        yield conn
 
 
 # Injectable dependency for our routes
-DBConnection = Annotated[AsyncConnection, Depends(get_db_connection)]
+DBConnection = Annotated[AsyncConnection, Depends(_get_db_connection)]
