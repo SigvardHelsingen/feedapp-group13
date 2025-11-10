@@ -50,10 +50,9 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-app.include_router(user.router)
+app.include_router(user.router) # instead of auth_debug.py
 app.include_router(poll.router)
 app.include_router(vote.router)
-app.include_router(auth_debug.router) #for auth_debug.py
 
 
 # Make the OpenAPI operation ids match the route function name

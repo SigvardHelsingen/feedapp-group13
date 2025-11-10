@@ -25,12 +25,9 @@ class Settings(BaseSettings):
 
     # Auth - JWT - Cookie /defaults
     SECRET_KEY: str = "PLEASE-CHANGE-ME-TO-A-LONG-RANDOM-SECRET"
-    JWT_ALGORITHM: str = "HS256"
     SESSION_TTL_SECONDS: int = 3600
     COOKIE_SECURE: bool = False #SET TRUE
     COOKIE_SAMESITE: str = "strict"
-    COOKIE_DOMAIN: str | None = None
-    SLIDING_RENEW_THRESHOLD_SEC: int = 900
 
     @property
     def database_url(self) -> str:
