@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     SESSION_TTL_SECONDS: int = 3600
     COOKIE_SECURE: bool = False #SET TRUE
     COOKIE_SAMESITE: str = "strict"
+    ALGORITHM: str = "HS256"
 
     @property
     def database_url(self) -> str:

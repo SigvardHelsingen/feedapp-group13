@@ -65,6 +65,16 @@ DB_PORT=5432
 DB_NAME=feedapp
 TEST_DB_NAME=feedapp_test
 VALKEY_CONN_STR=valkey://localhost/feedapp
+
+# --- Auth / JWT / Cookie ---
+# Use a long, random value here (see command below)
+SECRET_KEY=change-me
+JWT_ALGORITHM=HS256
+SESSION_TTL_SECONDS=3600
+
+# Cookie flags (enable Secure in production!)
+COOKIE_SECURE=false
+COOKIE_SAMESITE=strict
 ```
 
 ### 3. Database Setup

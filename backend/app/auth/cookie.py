@@ -27,7 +27,7 @@ def create_jwt(user_info: UserInfo) -> str:
         "username": user_info.username,
         "email": str(user_info.email),
     }
-    return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+    return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
 
@@ -37,7 +37,7 @@ def set_auth_cookie(user_info: UserInfo, response: Response):
     Create a JWT and store it in a cookie
     """
     settings = get_settings()
-    token = create_jwt(user_info) #token = jwt.encode(user_info.__dict__, "secret", algorithm="HS256")
+    token = create_jwt(user_info)
     response.set_cookie(
         key=_COOKIE_NAME,
         value=token,
@@ -68,7 +68,7 @@ def get_current_user_optional(request: Request, response: Response) -> UserInfo 
     if not token_str:
         return None
     try:
-        payload = jwt.decode(token_str, settings.SECRET_KEY, settings.JWT_ALGORITHM)
+        payload = jwt.decode(token_str, settings.SECRET_KEY, settings.ALGORITHM)
     except ExpiredSignatureError:
         #Token is expired: clear the cookie, treat as not logged in
         clear_auth_cookie(response)
