@@ -43,7 +43,7 @@ function PollComponent() {
 
   const pollOptionVotes = useLivePollVoteCounts(parseInt(pollId, 10));
 
-  const [status, setStatus] = useState("");
+  const [_status, setStatus] = useState("");
   const submitVote = useMutation({
     ...submitVoteMutation(),
     onError: () => {
@@ -130,7 +130,7 @@ function PollComponent() {
                           ? (pollOptionVotes[idx]?.vote_count ?? 0)
                           : ""}
                       </span>
-                      {selectedPoll.user_vote ==
+                      {selectedPoll.user_vote ===
                         selectedPoll.option_ids[idx] && <Check />}
                     </div>
                   </div>
