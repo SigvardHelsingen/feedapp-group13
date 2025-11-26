@@ -1,0 +1,50 @@
+#cloud-config
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - docker.io
+  - docker-compose
+  - wget
+  - curl
+  - nvme-cli
+
+runcmd:
+  - systemctl enable docker
+  - systemctl start docker
+  
+  - usermod -aG docker azureuser
+  
+  # Find and format local NVMe temp disk
+  - |
+    NVME_DEVICE=$(lsblk -d -n -o NAME,TYPE | grep disk | grep nvme | head -n1 | awk '{print $1}')
+    if [ -n "$NVME_DEVICE" ]; then
+      echo "Found NVMe device: /dev/$NVME_DEVICE"
+      mkfs.ext4 -F /dev/$NVME_DEVICE
+      mkdir -p /data
+      mount /dev/$NVME_DEVICE /data
+      chown -R azureuser:azureuser /data
+      echo "NVMe disk mounted at /data"
+      
+      # Save NVMe info for verification
+      nvme list > /home/azureuser/nvme-info.txt
+      lsblk > /home/azureuser/disk-info.txt
+      df -h > /home/azureuser/df-info.txt
+    else
+      echo "WARNING: No NVMe device found!" > /home/azureuser/nvme-error.txt
+    fi
+  
+  # Run node exporter
+  - docker run -d --name=node-exporter --net="host" --pid="host" -v "/:/host:ro,rslave" --restart unless-stopped quay.io/prometheus/node-exporter:latest --path.rootfs=/host
+  
+  # Download JMX exporter for future use in Kafka. Note the config is for 3.0.0, but our Kafka version will be 4.1.0
+  - mkdir /home/azureuser/jmx-exporter
+  - wget -q https://github.com/prometheus/jmx_exporter/releases/download/1.5.0/jmx_prometheus_javaagent-1.5.0.jar -O /home/azureuser/jmx-exporter/jmx_prometheus_javaagent-1.5.0.jar
+  - wget -q https://raw.githubusercontent.com/prometheus/jmx_exporter/refs/heads/main/examples/kafka-kraft-3_0_0.yml -O /home/azureuser/jmx-exporter/kafka-broker.yml
+  - chown -R azureuser:azureuser /home/azureuser/jmx-exporter
+  
+  - touch /home/azureuser/cloud-init-complete.txt
+  - date >> /home/azureuser/cloud-init-complete.txt
+
+final_message: "Broker node setup complete. System is ready after $UPTIME seconds"

@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  redpanda:
+    image: redpandadata/redpanda:v25.3.1
+    container_name: redpanda
+    hostname: redpanda
+    ports:
+      - "9092:9092"
+      - "9644:9644"
+      - "33145:33145"
+    command:
+      - redpanda
+      - start
+      - --node-id=2
+      - --kafka-addr=internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr=internal://broker3:9092,external://broker3:19092
+      - --rpc-addr=0.0.0.0:33145
+      - --advertise-rpc-addr=broker3:33145
+      - --seeds=broker1:33145,broker2:33145,broker3:33145
+    volumes:
+      - /data/redpanda:/var/lib/redpanda/data
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.52.1
+    container_name: cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    privileged: true
+    devices:
+      - /dev/kmsg

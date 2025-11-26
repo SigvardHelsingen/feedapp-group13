@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  kafka:
+    # Confluent 8.1 is Kafka 4.1
+    image: confluentinc/cp-kafka:8.1.0
+    container_name: kafka
+    hostname: kafka
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+      - "7071:7071"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker1:9093,2@broker2:9093,3@broker3:9093
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker1:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      # Random value
+      CLUSTER_ID: "0daafb3ee46563e6a708387c027742fb"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_OPTS: "-javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-1.5.0.jar=7071:/usr/share/jmx-exporter/kafka-broker.yml"
+      TOPIC_AUTO_CREATE: "false"
+    volumes:
+      - /data/kafka:/var/lib/kafka/data
+      - ./jmx-exporter:/usr/share/jmx-exporter:ro
+    command: >
+      bash -c "
+        kafka-storage format -t 0daafb3ee46563e6a708387c027742fb -c /etc/kafka/kafka.properties --ignore-formatted || true
+        /etc/confluent/docker/run
+      "
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.52.1
+    container_name: cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    privileged: true
+    devices:
+      - /dev/kmsg
+
+volumes:
+  kafka-data:

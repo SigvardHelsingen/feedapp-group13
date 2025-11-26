@@ -1,0 +1,12 @@
+# Terraform generated files and directories
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraformrc
+terraform.rc
+crash.log
+*.tfvars
+*.tfvars.json
+*.auto.tfvars
+*.auto.tfvars.json
+*.plan
