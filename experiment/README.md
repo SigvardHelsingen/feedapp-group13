@@ -8,7 +8,8 @@ and collecting Prometheus metrics.
 
 This creates the VMs on Azure, with Docker installed.
 
-1. Set up the Azure CLI on your machine, and log in to your account
+1. Set up the Azure CLI on your machine, and log in to your account.
+  You might need to up the vCPU quota for `standardLASv3Family` to 32 vCPUs on your Azure account
 2. Create an RSA ssh pubkey named `~/.ssh/azure_rsa`
 3. Run `terraform apply`
 4. Take the output named `ssh_config` and append it to your `~/.ssh/config`
@@ -93,4 +94,3 @@ Change directory into `scripts`, and run the verification scripts locally in ord
     --storage.tsdb.retention.size=1TB
   ```
 9. Tear down the Azure VMs with `terraform destroy` in the `infra` directory
-

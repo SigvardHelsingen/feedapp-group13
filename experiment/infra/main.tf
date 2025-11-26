@@ -29,7 +29,7 @@ variable "ssh_public_key_path" {
 }
 
 variable "vm_size" {
-  default = "Standard_L8as_v3"  # 8 vCPU (EPYC 7763 (Zen 3 7nm 2021)), 64GB RAM, 80 GiB local NVMe
+  default = "Standard_L8as_v3"  # 8 vCPU (EPYC 7763 (Zen 3 7nm 2021)), 64GB RAM, 1.8 TiB local NVMe
 }
 
 resource "azurerm_resource_group" "benchmark" {
