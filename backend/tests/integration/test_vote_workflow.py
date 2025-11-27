@@ -34,7 +34,7 @@ def test_full_poll_workflow(client: TestClient):
     vote_without_auth = client.post("api/vote/submit")
     assert (
         vote_without_auth.status_code == status.HTTP_401_UNAUTHORIZED
-    ), "Voting without being authorized not permitted"
+    ), "Unexpectedly voted on poll without authorization."
 
     # 2. Authorized vote on poll
     _ = client.post("/api/user/register", json=user_data)
@@ -58,7 +58,7 @@ def test_full_poll_workflow(client: TestClient):
     register_vote = client.post("/api/vote/submit", json=vote_data_non_existing_poll)
     assert (
         register_vote.status_code == status.HTTP_403_FORBIDDEN
-    ), "Cannot vote on non-existing poll"
+    ), "Unexpectedly voted on non-existing poll."
 
     # 4. Trying to vote on a non-existing vote-option.
     vote_data_non_existing_vote_option = {
@@ -70,4 +70,4 @@ def test_full_poll_workflow(client: TestClient):
     )
     assert (
         register_vote.status_code == status.HTTP_404_NOT_FOUND
-    ), "Cannot vote on non-existing vote_option"
+    ), "Unexpected vote on non-existing vote-option"

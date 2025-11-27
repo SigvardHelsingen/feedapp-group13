@@ -50,7 +50,7 @@ def test_full_poll_workflow(client: TestClient):
     poll_without_auth = client.post("/api/poll/create", json=poll_data_non_expiry)
     assert (
         poll_without_auth.status_code == status.HTTP_401_UNAUTHORIZED
-    ), "Failed to create poll, no user found"
+    ), "Unexpectedly created poll"
 
     # 2. Authorized user can create a poll without expiry date.
     _ = client.post("/api/user/register", json=user_data_1)
@@ -68,7 +68,7 @@ def test_full_poll_workflow(client: TestClient):
 
     # 4. Any user can get all polls
     get_polls_response = client.get("api/poll/all")
-    assert len(get_polls_response.json()) == 2, "Cannot get all polls"
+    assert len(get_polls_response.json()) == 2, "Failed to get all polls"
 
     # 5. User can delete their own poll
     user_owned_poll = get_polls_response.json()[0]["id"]
@@ -81,7 +81,7 @@ def test_full_poll_workflow(client: TestClient):
     deleted_response = client.delete(f"api/poll/{user_owned_poll}")
     assert (
         deleted_response.status_code == status.HTTP_401_UNAUTHORIZED
-    ), "Cannot delete poll, does not exist"
+    ), "Unexpectedly deleted poll"
 
     # 7. User cannot delete another users poll
     _ = client.post("api/user/logout")
@@ -91,4 +91,4 @@ def test_full_poll_workflow(client: TestClient):
     deleted_response = client.delete(f"api/poll/{user_owned_poll}")
     assert (
         deleted_response.status_code == status.HTTP_401_UNAUTHORIZED
-    ), f"Failed to delete poll {user_owned_poll}"
+    ), f"Unexpectedly deleted poll with id {user_owned_poll}"
