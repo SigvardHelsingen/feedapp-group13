@@ -1,0 +1,45 @@
+name: Build and push frontend + backend Docker images
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build frontend image
+        run: |
+          docker build \
+            -t ghcr.io/sigvardhelsingen/$(basename ${{ github.repository }})/frontend:main \
+            ./frontend
+
+      - name: Push frontend image
+        run: |
+          docker push ghcr.io/sigvardhelsingen/$(basename ${{ github.repository }})/frontend:main
+
+      - name: Build backend image
+        run: |
+          docker build \
+            -t ghcr.io/sigvardhelsingen/$(basename ${{ github.repository }})/backend:main \
+            ./backend
+
+      - name: Push backend image
+        run: |
+          docker push ghcr.io/sigvardhelsingen/$(basename ${{ github.repository }})/backend:main
+
